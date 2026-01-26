@@ -59,7 +59,7 @@ export function OnboardingTabs() {
       />
       <div
         ref={viewsContainerRef}
-        className="relative w-full min-h-[500px] overflow-hidden"
+        className="relative w-full min-h-[500px] flex justify-center"
       >
         {isMounted &&
           viewsContainerWidth > 0 &&
