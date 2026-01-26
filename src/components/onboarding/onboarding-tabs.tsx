@@ -1,0 +1,221 @@
+"use client";
+
+import {
+  motion,
+  useMotionTemplate,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "motion/react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+import { StepCredentials } from "@/components/onboarding/step-credentials";
+import { StepPlan } from "@/components/onboarding/step-plan";
+import { SocialProofBadge } from "@/components/ui/social-proof-badge";
+import { cn } from "@/lib/utils";
+import {
+  useOnboardingStore,
+  type OnboardingStep,
+} from "@/lib/stores/onboarding-store";
+
+const tabs: { id: OnboardingStep; label: string }[] = [
+  { id: 1, label: "Profil" },
+  { id: 2, label: "Plan" },
+  { id: 3, label: "Paiement" },
+  { id: 4, label: "Merci" },
+];
+
+export function OnboardingTabs() {
+  const { currentStep, setStep } = useOnboardingStore();
+  const isMounted = useMounted();
+
+  const viewsContainerRef = useRef<HTMLDivElement>(null);
+  const [viewsContainerWidth, setViewsContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (viewsContainerRef.current) {
+        const width = viewsContainerRef.current.getBoundingClientRect().width;
+        setViewsContainerWidth(width);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  const handleTabClick = (tabId: OnboardingStep) => {
+    setStep(tabId);
+  };
+
+  return (
+    <div className="flex flex-col gap-6 w-full">
+      <SocialProofBadge />
+      <TabsNavigation
+        tabs={tabs}
+        activeStep={currentStep}
+        onTabClick={handleTabClick}
+      />
+      <div
+        ref={viewsContainerRef}
+        className="relative w-full min-h-[500px] overflow-hidden"
+      >
+        {isMounted &&
+          viewsContainerWidth > 0 &&
+          tabs.map((tab, idx) => (
+            <View
+              key={tab.id}
+              containerWidth={viewsContainerWidth}
+              viewIndex={idx}
+              activeIndex={currentStep - 1}
+            >
+              <StepContent step={tab.id} />
+            </View>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+function View({
+  children,
+  containerWidth,
+  viewIndex,
+  activeIndex,
+}: {
+  children: React.ReactNode;
+  containerWidth: number;
+  viewIndex: number;
+  activeIndex: number;
+}) {
+  const [difference, setDifference] = useState(activeIndex - viewIndex);
+  const x = useSpring(calculateViewX(difference, containerWidth), {
+    stiffness: 300,
+    damping: 40,
+  });
+
+  const xVelocity = useVelocity(x);
+
+  const opacity = useTransform(
+    x,
+    [-containerWidth * 0.6, 0, containerWidth * 0.6],
+    [0, 1, 0],
+  );
+
+  const blur = useTransform(xVelocity, [-800, 0, 800], [3, 0, 3], {
+    clamp: false,
+  });
+
+  useEffect(() => {
+    const newDifference = activeIndex - viewIndex;
+    setDifference(newDifference);
+    const newX = calculateViewX(newDifference, containerWidth);
+    x.set(newX);
+  }, [activeIndex, containerWidth, viewIndex, x]);
+
+  return (
+    <motion.div
+      className="absolute inset-0 will-change-transform"
+      style={{
+        x,
+        opacity,
+        filter: useMotionTemplate`blur(${blur}px)`,
+      }}
+    >
+      <div className="w-full h-full">{children}</div>
+    </motion.div>
+  );
+}
+
+function TabsNavigation({
+  tabs,
+  activeStep,
+  onTabClick,
+}: {
+  tabs: { id: OnboardingStep; label: string }[];
+  activeStep: OnboardingStep;
+  onTabClick: (tabId: OnboardingStep) => void;
+}) {
+  return (
+    <nav className="flex w-full bg-strong/4 rounded-full p-1 border-0.5 border-border-base">
+      {tabs.map((tab) => {
+        const isActive = activeStep === tab.id;
+        const isCompleted = tab.id < activeStep;
+
+        return (
+          <motion.button
+            key={tab.id}
+            onClick={() => onTabClick(tab.id)}
+            whileHover={{ scale: isActive ? 1 : 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={cn(
+              "relative flex-1 h-8 md:h-9 rounded-full flex items-center justify-center px-4 text-xs md:text-s font-medium cursor-pointer transition-colors duration-200",
+              !isActive && "hover:text-strong",
+              isActive && "text-static-white",
+              isCompleted && !isActive && "text-green-700",
+              !isActive && !isCompleted && "text-soft",
+            )}
+          >
+            <motion.span
+              className="relative z-10 flex items-center justify-center"
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {tab.label}
+            </motion.span>
+
+            {isActive && (
+              <motion.span
+                layoutId="activeTab"
+                transition={{
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 35,
+                }}
+                className="absolute inset-0 bg-strong rounded-full shadow-sm"
+              />
+            )}
+          </motion.button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function StepContent({ step }: { step: OnboardingStep }) {
+  switch (step) {
+    case 1:
+      return <StepCredentials />;
+    case 2:
+      return <StepPlan />;
+    case 3:
+      return <StepPlaceholder step={3} title="Paiement" />;
+    case 4:
+      return <StepPlaceholder step={4} title="Merci" />;
+  }
+}
+
+function StepPlaceholder({ step, title }: { step: number; title: string }) {
+  return (
+    <div className="flex flex-col gap-4 items-center justify-center py-20">
+      <span className="text-soft">Étape {step}</span>
+      <h2 className="h4 text-strong">{title}</h2>
+      <p className="text-soft">À implémenter</p>
+    </div>
+  );
+}
+
+function calculateViewX(difference: number, containerWidth: number) {
+  return difference * (containerWidth * 0.75) * -1;
+}
+
+const emptySubscribe = () => () => {};
+
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
