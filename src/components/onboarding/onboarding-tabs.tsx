@@ -5,7 +5,6 @@ import {
   useMotionTemplate,
   useSpring,
   useTransform,
-  useVelocity,
 } from "motion/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
@@ -101,12 +100,8 @@ function View({
   const [difference, setDifference] = useState(activeIndex - viewIndex);
   const x = useSpring(calculateViewX(difference, containerWidth), {
     stiffness: 300,
-    damping: 35,
-    restSpeed: 10,
-    restDelta: 1,
+    damping: 30,
   });
-
-  const xVelocity = useVelocity(x);
 
   const opacity = useTransform(
     x,
@@ -114,8 +109,11 @@ function View({
     [0, 1, 0],
   );
 
-  const blurRaw = useTransform(xVelocity, [-1500, 0, 1500], [4, 0, 4]);
-  const blur = useSpring(blurRaw, { stiffness: 400, damping: 50 });
+  const blur = useTransform(
+    x,
+    [-containerWidth * 0.5, 0, containerWidth * 0.5],
+    [4, 0, 4],
+  );
 
   useEffect(() => {
     const newDifference = activeIndex - viewIndex;
