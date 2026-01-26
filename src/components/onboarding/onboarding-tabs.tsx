@@ -165,18 +165,14 @@ function TabsNavigation({
               !isActive && !isCompleted && "text-soft",
             )}
           >
-            <motion.span
-              className="relative z-10 flex items-center justify-center"
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
+            <span className="relative z-10 flex items-center justify-center">
               {tab.label}
-            </motion.span>
+            </span>
 
             {isActive && (
               <motion.span
                 layoutId="activeTab"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                 className="absolute inset-0 bg-strong rounded-full shadow-sm"
               />
             )}
