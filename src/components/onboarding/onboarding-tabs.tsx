@@ -101,7 +101,9 @@ function View({
   const [difference, setDifference] = useState(activeIndex - viewIndex);
   const x = useSpring(calculateViewX(difference, containerWidth), {
     stiffness: 300,
-    damping: 40,
+    damping: 35,
+    restSpeed: 10,
+    restDelta: 1,
   });
 
   const xVelocity = useVelocity(x);
@@ -112,9 +114,8 @@ function View({
     [0, 1, 0],
   );
 
-  const blur = useTransform(xVelocity, [-800, 0, 800], [3, 0, 3], {
-    clamp: false,
-  });
+  const blurRaw = useTransform(xVelocity, [-1500, 0, 1500], [4, 0, 4]);
+  const blur = useSpring(blurRaw, { stiffness: 400, damping: 50 });
 
   useEffect(() => {
     const newDifference = activeIndex - viewIndex;
