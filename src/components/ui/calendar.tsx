@@ -89,7 +89,7 @@ function Calendar({
               <select
                 className="absolute inset-0 cursor-pointer opacity-0"
                 value={value}
-                onChange={(e) => onChange?.(Number(e.target.value))}
+                onChange={onChange}
                 aria-label={ariaLabel}
               >
                 {options?.map((option) => (

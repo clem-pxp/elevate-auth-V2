@@ -40,9 +40,18 @@ export function OnboardingTabs() {
       }
     };
 
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const debouncedUpdateWidth = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateWidth, 100);
+    };
+
     updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    window.addEventListener("resize", debouncedUpdateWidth);
+    return () => {
+      window.removeEventListener("resize", debouncedUpdateWidth);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleTabClick = (tabId: OnboardingStep) => {
@@ -116,7 +125,7 @@ function View({
 
   return (
     <motion.div
-      className="[grid-area:1/1] will-change-transform"
+      className="[grid-area:1/1]"
       style={{
         x,
         opacity,
@@ -168,11 +177,7 @@ function TabsNavigation({
             {isActive && (
               <motion.span
                 layoutId="activeTab"
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 35,
-                }}
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 className="absolute inset-0 bg-strong rounded-full shadow-sm"
               />
             )}

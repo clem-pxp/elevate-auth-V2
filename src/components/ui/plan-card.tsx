@@ -68,12 +68,7 @@ export function PlanCard({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              reducedMotion: "user",
-            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             <div className="px-4 pb-4">
               <p className="text-s font-medium">{description}</p>
