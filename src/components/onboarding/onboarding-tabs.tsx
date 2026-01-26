@@ -110,8 +110,9 @@ function View({
     [0, 1, 0],
   );
 
-  const deadZone = containerWidth * 0.1;
   const blur = useTransform(x, (xValue) => {
+    if (containerWidth < 768) return 0;
+    const deadZone = containerWidth * 0.1;
     const absX = Math.abs(xValue);
     if (absX < deadZone) return 0;
     const normalized = (absX - deadZone) / (containerWidth * 0.4);
