@@ -46,7 +46,7 @@ export function OnboardingTabs() {
     };
 
     updateWidth();
-    window.addEventListener("resize", debouncedUpdateWidth);
+    window.addEventListener("resize", debouncedUpdateWidth, { passive: true });
     return () => {
       window.removeEventListener("resize", debouncedUpdateWidth);
       clearTimeout(timeoutId);
@@ -101,6 +101,7 @@ function View({
   const x = useSpring(calculateViewX(difference, containerWidth), {
     stiffness: 300,
     damping: 30,
+    restDelta: 0.5,
   });
 
   const opacity = useTransform(
@@ -109,11 +110,15 @@ function View({
     [0, 1, 0],
   );
 
-  const blur = useTransform(
-    x,
-    [-containerWidth * 0.5, 0, containerWidth * 0.5],
-    [4, 0, 4],
-  );
+  const deadZone = containerWidth * 0.1;
+  const blur = useTransform(x, (xValue) => {
+    const absX = Math.abs(xValue);
+    if (absX < deadZone) return 0;
+    const normalized = (absX - deadZone) / (containerWidth * 0.4);
+    return Math.min(normalized * 3, 3);
+  });
+
+  const filterBlur = useMotionTemplate`blur(${blur}px)`;
 
   useEffect(() => {
     const newDifference = activeIndex - viewIndex;
@@ -124,11 +129,11 @@ function View({
 
   return (
     <motion.div
-      className="[grid-area:1/1]"
+      className="[grid-area:1/1] [transform:translate3d(0,0,0)]"
       style={{
         x,
         opacity,
-        filter: useMotionTemplate`blur(${blur}px)`,
+        filter: filterBlur,
       }}
     >
       {children}

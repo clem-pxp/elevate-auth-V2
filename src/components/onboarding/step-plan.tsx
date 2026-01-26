@@ -29,14 +29,19 @@ const plans = [
 ];
 
 export function StepPlan() {
-  const { formData, updateFormData, nextStep, prevStep } = useOnboardingStore();
+  const selectedPlanId = useOnboardingStore(
+    (state) => state.formData.selectedPlanId,
+  );
+  const updateFormData = useOnboardingStore((state) => state.updateFormData);
+  const nextStep = useOnboardingStore((state) => state.nextStep);
+  const prevStep = useOnboardingStore((state) => state.prevStep);
 
   const handleSelect = (planId: string) => {
     updateFormData({ selectedPlanId: planId });
   };
 
   const handleNext = () => {
-    if (formData.selectedPlanId) {
+    if (selectedPlanId) {
       nextStep();
     }
   };
@@ -58,7 +63,7 @@ export function StepPlan() {
             name={plan.name}
             price={plan.price}
             description={plan.description}
-            selected={formData.selectedPlanId === plan.id}
+            selected={selectedPlanId === plan.id}
             onSelect={handleSelect}
           />
         ))}
@@ -70,7 +75,7 @@ export function StepPlan() {
         </Button>
         <Button
           onClick={handleNext}
-          disabled={!formData.selectedPlanId}
+          disabled={!selectedPlanId}
           className="flex-1"
         >
           Suivant

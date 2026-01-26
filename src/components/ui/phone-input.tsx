@@ -22,6 +22,22 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+const PhoneInputField = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<"input">
+>(function PhoneInputField({ className, ...props }, ref) {
+  return (
+    <input
+      ref={ref}
+      className={cn(
+        "PhoneInputInput flex-1 h-10 md:h-9 px-4 text-base md:text-s text-strong bg-light border border-border-base border-l-0 rounded-r-10 outline-none transition-colors duration-150 placeholder:text-placeholder hover:border-border-strong focus:border-accent-base focus:ring-2 focus:ring-accent-base/20 disabled:bg-fade-lighter disabled:text-disabled disabled:cursor-not-allowed",
+        className,
+      )}
+      {...props}
+    />
+  );
+});
+
 interface PhoneInputProps {
   label?: string;
   value: string;
@@ -71,7 +87,7 @@ export function PhoneInput({
       }
     };
     updateWidth();
-    window.addEventListener("resize", updateWidth);
+    window.addEventListener("resize", updateWidth, { passive: true });
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
@@ -130,22 +146,7 @@ export function PhoneInput({
               countrySelectComponent={(props) => (
                 <CountrySelect {...props} onMount={handleCountrySelectMount} />
               )}
-              inputComponent={React.forwardRef<
-                HTMLInputElement,
-                React.ComponentProps<"input">
-              >(function InputComponent({ className, ...props }, ref) {
-                return (
-                  <input
-                    ref={ref}
-                    id={id}
-                    className={cn(
-                      "PhoneInputInput flex-1 h-10 md:h-9 px-4 text-base md:text-s text-strong bg-light border border-border-base border-l-0 rounded-r-10 outline-none transition-colors duration-150 placeholder:text-placeholder hover:border-border-strong focus:border-accent-base focus:ring-2 focus:ring-accent-base/20 disabled:bg-fade-lighter disabled:text-disabled disabled:cursor-not-allowed",
-                      className,
-                    )}
-                    {...props}
-                  />
-                );
-              })}
+              inputComponent={PhoneInputField}
               smartCaret={false}
             />
           </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { CompteHeader } from "@/components/compte/compte-header";
 import { NavLink } from "@/components/compte/nav-link";
@@ -50,14 +50,17 @@ export default function CompteLayout({
             </aside>
 
             <main className="md:col-[4/-1]">
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {children}
-              </motion.div>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={pathname}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
             </main>
           </div>
         </div>

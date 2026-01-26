@@ -1,15 +1,30 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
 import { useOnboardingStore } from "@/lib/stores/onboarding-store";
 import { signupSchema } from "@/lib/validations";
+
+const PhoneInput = dynamic(
+  () => import("@/components/ui/phone-input").then((m) => m.PhoneInput),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col gap-1.5">
+        <span className="text-s font-medium leading-tight text-fade">
+          Téléphone
+        </span>
+        <div className="h-10 md:h-9 bg-fade-lighter rounded-10 animate-pulse" />
+      </div>
+    ),
+  },
+);
 
 export function StepCredentials() {
   const { formData, updateFormData, nextStep } = useOnboardingStore();
