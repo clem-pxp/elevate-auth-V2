@@ -9,8 +9,8 @@ import { OnboardingForm } from "@/components/onboarding/onboarding-form";
 export default function SignupPage() {
   return (
     <div className="min-h-screen bg-main md:p-2 md:grid md:grid-cols-2">
-      <div className="w-full justify-center flex overflow-hidden">
-        <div className="px-6 py-3 max-w-[40rem] w-full">
+      <div className="w-full justify-center flex">
+        <div className="px-5 md:px-6 py-3 max-w-[40rem] w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

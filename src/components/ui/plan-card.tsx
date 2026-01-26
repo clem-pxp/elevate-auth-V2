@@ -1,101 +1,86 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 
 interface PlanCardProps {
   id: string;
   name: string;
   price: string;
-  period: string;
-  features: string[];
+  description: string;
   selected: boolean;
   onSelect: (id: string) => void;
-  discount?: string;
+}
+
+function ElevateIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M9.98564 22.6472C6.44522 22.6472 4.83182 17.2847 6.23761 11.1414L6.55013 9.94432H22.6024V9.9388C22.7007 8.13436 22.3937 6.32439 21.6461 4.67897C20.9956 3.24778 19.9609 1.75586 18.332 0.935352C17.5712 0.552156 16.1841 0 14.5155 0C13.631 0 12.7453 0.103805 11.8608 0.260618C7.01836 1.24898 3.21732 5.20572 1.81153 10.6202C0.198131 17.1279 3.11351 24 9.62122 24C13.1616 24 16.2846 22.5423 19.0962 16.7634H17.0135C15.399 19.7307 13.2654 22.6461 9.98564 22.6461V22.6472ZM12.0684 1.50959C12.6934 1.24898 13.3704 1.14517 14.1511 1.14517C16.8059 1.14517 18.3685 4.21626 18.4204 8.32982H7.01836C8.11163 4.94621 9.67312 2.44715 12.0684 1.50959Z" />
+    </svg>
+  );
 }
 
 export function PlanCard({
   id,
   name,
   price,
-  period,
-  features,
+  description,
   selected,
   onSelect,
-  discount,
 }: PlanCardProps) {
   return (
     <button
       type="button"
       onClick={() => onSelect(id)}
       className={cn(
-        "relative flex flex-col p-5 rounded-16 border-2 text-left transition-all duration-150 cursor-pointer",
-        "hover:border-accent-base/50",
-        selected
-          ? "border-accent-base bg-accent-base/5"
-          : "border-border-base bg-light",
+        "w-full text-left rounded-16 border-[0.5px] border-border-base shadow-small transition-colors duration-150 cursor-pointer overflow-hidden",
+        selected ? "bg-strong text-light" : "bg-light",
       )}
     >
-      {discount && (
-        <span className="absolute -top-3 right-4 px-3 py-1 text-xs font-semibold bg-success-base text-static-white rounded-full">
-          {discount}
-        </span>
-      )}
-
-      <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-strong">{price}</span>
-        <span className="text-soft">{period}</span>
-      </div>
-
-      <span className="mt-2 text-base font-medium text-strong">{name}</span>
-
-      <ul className="mt-4 flex flex-col gap-2">
-        {features.map((feature) => (
-          <li
-            key={feature}
-            className="flex items-center gap-2 text-s text-soft"
+      <div className="p-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "size-7 rounded-10 flex items-center justify-center transition-colors duration-150",
+              selected ? "bg-light" : "bg-strong",
+            )}
           >
-            <CheckIcon className="h-4 w-4 text-success-base flex-shrink-0" />
-            {feature}
-          </li>
-        ))}
-      </ul>
-
-      <div
-        className={cn(
-          "mt-4 pt-4 border-t border-border-soft flex items-center justify-center",
-          selected ? "text-accent-base" : "text-soft",
-        )}
-      >
-        <div
-          className={cn(
-            "h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors",
-            selected
-              ? "border-accent-base bg-accent-base"
-              : "border-border-base",
-          )}
-        >
-          {selected && <CheckIcon className="h-3 w-3 text-static-white" />}
+            <ElevateIcon
+              className={cn(
+                "size-4 transition-colors duration-150",
+                selected ? "text-strong" : "text-light",
+              )}
+            />
+          </div>
+          <span className="font-medium">{name}</span>
         </div>
-        <span className="ml-2 text-s font-medium">
-          {selected ? "Sélectionné" : "Sélectionner"}
-        </span>
+        <span className="font-medium">{price}</span>
       </div>
-    </button>
-  );
-}
 
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
+      <AnimatePresence initial={false}>
+        {selected && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+              reducedMotion: "user",
+            }}
+          >
+            <div className="px-4 pb-4">
+              <p className="text-s font-medium">{description}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </button>
   );
 }

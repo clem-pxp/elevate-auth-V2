@@ -59,7 +59,7 @@ export function OnboardingTabs() {
       />
       <div
         ref={viewsContainerRef}
-        className="relative w-full min-h-[500px] flex justify-center"
+        className="grid w-full grid-cols-[repeat(1,minmax(0,1fr))]"
       >
         {isMounted &&
           viewsContainerWidth > 0 &&
@@ -116,14 +116,14 @@ function View({
 
   return (
     <motion.div
-      className="absolute inset-0 will-change-transform"
+      className="[grid-area:1/1] will-change-transform"
       style={{
         x,
         opacity,
         filter: useMotionTemplate`blur(${blur}px)`,
       }}
     >
-      <div className="w-full h-full">{children}</div>
+      {children}
     </motion.div>
   );
 }

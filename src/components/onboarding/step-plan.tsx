@@ -8,40 +8,23 @@ const plans = [
   {
     id: "monthly",
     name: "Mensuel",
-    price: "29,99€",
-    period: "/mois",
-    features: [
-      "Accès illimité à tous les programmes",
-      "Suivi personnalisé",
-      "Support prioritaire",
-    ],
+    price: "29,99€/mois",
+    description:
+      "Accès illimité à tous les programmes, suivi personnalisé et support prioritaire.",
   },
   {
     id: "quarterly",
     name: "Trimestriel",
-    price: "79,99€",
-    period: "/trimestre",
-    discount: "-11%",
-    features: [
-      "Accès illimité à tous les programmes",
-      "Suivi personnalisé",
-      "Support prioritaire",
-      "Coaching mensuel",
-    ],
+    price: "79,99€/trimestre",
+    description:
+      "Accès illimité à tous les programmes, suivi personnalisé, support prioritaire et coaching mensuel.",
   },
   {
     id: "annual",
     name: "Annuel",
-    price: "249,99€",
-    period: "/an",
-    discount: "-30%",
-    features: [
-      "Accès illimité à tous les programmes",
-      "Suivi personnalisé",
-      "Support prioritaire",
-      "Coaching mensuel",
-      "Contenu exclusif",
-    ],
+    price: "249,99€/an",
+    description:
+      "Accès illimité à tous les programmes, suivi personnalisé, support prioritaire, coaching mensuel et contenu exclusif.",
   },
 ];
 
@@ -67,16 +50,14 @@ export function StepPlan() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="flex flex-col gap-3">
         {plans.map((plan) => (
           <PlanCard
             key={plan.id}
             id={plan.id}
             name={plan.name}
             price={plan.price}
-            period={plan.period}
-            features={plan.features}
-            discount={plan.discount}
+            description={plan.description}
             selected={formData.selectedPlanId === plan.id}
             onSelect={handleSelect}
           />
