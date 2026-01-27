@@ -30,7 +30,7 @@ const PhoneInputField = React.forwardRef<
     <input
       ref={ref}
       className={cn(
-        "PhoneInputInput flex-1 h-10 md:h-9 px-4 text-base md:text-s text-strong bg-light border border-border-base border-l-0 rounded-r-10 outline-none transition-colors duration-150 placeholder:text-placeholder hover:border-border-strong focus:border-accent-base focus:ring-2 focus:ring-accent-base/20 disabled:bg-fade-lighter disabled:text-disabled disabled:cursor-not-allowed",
+        "PhoneInputInput flex-1 h-10 px-4 text-base md:text-s text-strong bg-light border border-border-base border-l-0 rounded-r-14 outline-none transition-colors duration-150 placeholder:text-placeholder hover:border-border-strong focus:border-accent-base focus:ring-2 focus:ring-accent-base/20 disabled:bg-fade-lighter disabled:text-disabled disabled:cursor-not-allowed",
         className,
       )}
       {...props}
@@ -188,7 +188,7 @@ const CountrySelect = ({
       <Button
         type="button"
         variant="outline"
-        className="flex gap-1 rounded-l-10 rounded-r-none border-r-0 px-3 focus:z-10 h-10 md:h-9 shadow-none"
+        className="flex gap-1 rounded-l-14 rounded-r-none border-r-0 px-3 focus:z-10 h-10 shadow-none"
         disabled={disabled}
         onClick={() => context?.setIsOpen(true)}
       >

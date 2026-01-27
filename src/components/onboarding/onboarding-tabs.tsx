@@ -167,7 +167,7 @@ function TabsNavigation({
             whileTap={{ scale: 0.98 }}
             className={cn(
               "relative flex-1 h-8 md:h-9 rounded-full flex items-center justify-center px-4 text-xs md:text-s font-medium cursor-pointer transition-colors duration-200",
-              !isActive && "hover:text-strong",
+              !isActive && "pointer-events-none",
               isActive && "text-static-white",
               isCompleted && !isActive && "text-green-700",
               !isActive && !isCompleted && "text-soft",

@@ -41,11 +41,11 @@ export function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex items-center gap-2 w-full h-10 md:h-9 px-4",
+            "flex items-center gap-2 w-full h-10 px-4",
             "text-base md:text-s text-left",
             "bg-light",
             "border border-border-base",
-            "rounded-10",
+            "rounded-14",
             "outline-none",
             "transition-colors duration-150",
             "hover:border-border-strong",
