@@ -6,6 +6,54 @@ Développer un tunnel d'onboarding web pour l'app mobile Elevate permettant aux 
 
 ---
 
+## 📊 Statut d'avancement
+
+### ✅ Terminé
+
+| Composant | Description |
+|-----------|-------------|
+| **Infrastructure de base** | Next.js 16 + React 19 + TypeScript + Tailwind CSS v4 |
+| **Page /signup** | Page de création de compte (placeholder) |
+| **Page /login** | Page de connexion avec formulaire |
+| **Page /onboarding** | Single page avec 4 steps + navigation tabs animée |
+| **Composants UI** | Button, Input, Card, DatePicker, PhoneInput, Popover, ScrollArea, Command |
+| **Step 1: Credentials** | Formulaire complet (Prénom, Nom, Téléphone, Date naissance, Email, Password) |
+| **Step 2: Plan Selection** | Affichage des 3 plans avec PlanCard sélectionnable |
+| **Step 4: Thank You** | Page Merci avec liens App Store / Play Store + lien dashboard |
+| **Zustand Store** | onboarding-store.ts avec gestion état formulaire + navigation steps |
+| **Animations** | Transitions fluides entre steps avec Motion (blur, opacity, x-translate) |
+| **Zod Validations** | Schéma signupSchema pour validation formulaire |
+| **Espace Compte** | Layout /compte avec sous-pages profile et facturation (structure) |
+
+### 🚧 En cours / À faire
+
+| Composant | Priorité | Description |
+|-----------|----------|-------------|
+| **Step 3: Checkout** | 🔴 Haute | Stripe Embedded Checkout (placeholder actuellement) |
+| **API /api/auth/signup** | 🔴 Haute | Créer user Firebase Auth |
+| **API /api/auth/login** | 🔴 Haute | Vérifier credentials, retourner JWT |
+| **API /api/profile/update** | 🔴 Haute | Sauvegarder profil + créer Stripe Customer |
+| **API /api/stripe/prices** | 🟡 Moyenne | Récupérer les prix Stripe dynamiquement |
+| **API /api/stripe/create-checkout-session** | 🔴 Haute | Créer session Stripe Embedded Checkout |
+| **API /api/stripe/session-status** | 🟡 Moyenne | Vérifier status paiement |
+| **API /api/webhooks/stripe** | 🔴 Haute | Gérer events Stripe + update Firestore/Claims |
+| **Middleware auth** | 🔴 Haute | Protection routes /onboarding et /dashboard |
+| **Google OAuth** | 🟡 Moyenne | Auth via Google |
+| **Apple Sign-In** | 🟡 Moyenne | Auth via Apple |
+| **API /api/stripe/create-portal-session** | 🟢 Basse | Customer Portal pour /dashboard |
+| **API /api/auth/generate-app-token** | 🟢 Basse | Firebase Custom Token pour deep link |
+| **Klaviyo integration** | 🟢 Basse | Envoi profil marketing |
+
+### 📝 Changements par rapport au plan initial
+
+1. **Phone Input** : Utilisation de `react-phone-number-input` au lieu de `react-international-phone` (mentionné dans le plan). Le composant PhoneInput est un composant custom avec sélecteur de pays dropdown, recherche de pays, et format international.
+
+2. **Structure Steps** : Le Step 1 combine le formulaire profil ET le signup (email/password) en une seule étape au lieu de séparer signup et onboarding.
+
+3. **Compte pages** : Ajout des pages `/compte`, `/compte/profile`, `/compte/facturation` (structure dashboard alternative).
+
+---
+
 ## Architecture du Flow
 
 ```
