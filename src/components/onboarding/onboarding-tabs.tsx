@@ -98,6 +98,7 @@ function View({
   viewIndex: number;
   activeIndex: number;
 }) {
+  const isActive = viewIndex === activeIndex;
   const [difference, setDifference] = useState(activeIndex - viewIndex);
   const x = useSpring(calculateViewX(difference, containerWidth), {
     stiffness: 300,
@@ -132,7 +133,10 @@ function View({
 
   return (
     <motion.div
-      className="[grid-area:1/1] [transform:translate3d(0,0,0)]"
+      className={cn(
+        "[grid-area:1/1] [transform:translate3d(0,0,0)]",
+        !isActive && "pointer-events-none",
+      )}
       style={{
         x,
         opacity,
@@ -167,7 +171,7 @@ function TabsNavigation({
             whileTap={{ scale: 0.98 }}
             className={cn(
               "relative flex-1 h-8 md:h-9 rounded-full flex items-center justify-center px-4 text-xs md:text-s font-medium cursor-pointer transition-colors duration-200",
-              !isActive && "pointer-events-none",
+              !isActive && "hover:text-strong",
               isActive && "text-static-white",
               isCompleted && !isActive && "text-green-700",
               !isActive && !isCompleted && "text-soft",

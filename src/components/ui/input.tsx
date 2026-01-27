@@ -26,7 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, c
             text-base md:text-s text-strong
             bg-light
             border border-border-base
-            rounded-10
+            rounded-14
             outline-none
             transition-colors duration-150
             placeholder:text-placeholder
