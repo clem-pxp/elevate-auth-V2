@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { StepCredentials } from "@/components/onboarding/step-credentials";
+import { StepMerci } from "@/components/onboarding/step-merci";
 import { StepPlan } from "@/components/onboarding/step-plan";
 import { SocialProofBadge } from "@/components/ui/social-proof-badge";
 import { cn } from "@/lib/utils";
@@ -198,7 +199,7 @@ function StepContent({ step }: { step: OnboardingStep }) {
     case 3:
       return <StepPlaceholder step={3} title="Paiement" />;
     case 4:
-      return <StepPlaceholder step={4} title="Merci" />;
+      return <StepMerci />;
   }
 }
 
