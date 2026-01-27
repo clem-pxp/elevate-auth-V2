@@ -102,14 +102,15 @@ function View({
   const x = useSpring(calculateViewX(difference, containerWidth), {
     stiffness: 300,
     damping: 30,
-    restDelta: 0.5,
+    restDelta: 0.01,
   });
 
-  const opacity = useTransform(
-    x,
-    [-containerWidth * 0.6, 0, containerWidth * 0.6],
-    [0, 1, 0],
-  );
+  const opacity = useTransform(x, (xValue) => {
+    const threshold = containerWidth * 0.7;
+    if (Math.abs(xValue) >= threshold) return 0;
+    const normalized = Math.abs(xValue) / threshold;
+    return 1 - normalized;
+  });
 
   const blur = useTransform(x, (xValue) => {
     if (containerWidth < 768) return 0;
