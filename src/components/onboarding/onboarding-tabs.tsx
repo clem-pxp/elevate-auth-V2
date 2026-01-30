@@ -70,7 +70,9 @@ export function OnboardingTabs() {
   }, []);
 
   const handleTabClick = (tabId: OnboardingStep) => {
-    setStep(tabId);
+    if (tabId <= currentStep) {
+      setStep(tabId);
+    }
   };
 
   return (
@@ -177,19 +179,19 @@ function TabsNavigation({
       {tabs.map((tab) => {
         const isActive = activeStep === tab.id;
         const isCompleted = tab.id < activeStep;
+        const isFuture = tab.id > activeStep;
 
         return (
           <motion.button
             key={tab.id}
             onClick={() => onTabClick(tab.id)}
-            whileHover={{ scale: isActive ? 1 : 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isFuture ? { scale: isActive ? 1 : 1.02 } : undefined}
+            whileTap={!isFuture ? { scale: 0.98 } : undefined}
             className={cn(
-              "relative flex-1 h-8 md:h-9 rounded-full flex items-center justify-center px-4 text-xs md:text-s font-medium cursor-pointer transition-colors duration-200",
-              !isActive && "hover:text-strong",
-              isActive && "text-static-white",
-              isCompleted && !isActive && "text-green-700",
-              !isActive && !isCompleted && "text-soft",
+              "relative flex-1 h-8 md:h-9 rounded-full flex items-center justify-center px-4 text-xs md:text-s font-medium transition-colors duration-200",
+              isActive && "text-static-white cursor-default",
+              isCompleted && "text-green-700 cursor-pointer hover:text-strong",
+              isFuture && "text-soft/50 cursor-default",
             )}
           >
             <span className="relative z-10 flex items-center justify-center">
