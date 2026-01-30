@@ -5,7 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
 function formatPrivateKey(key: string) {
-  return key.replace(/\\n/g, "\n");
+  return key.replace(/^"/, "").replace(/"$/, "").replace(/\\n/g, "\n");
 }
 
 function initAdmin() {
