@@ -94,7 +94,7 @@ export function OnboardingTabs() {
               viewIndex={idx}
               activeIndex={currentStep - 1}
             >
-              <StepContent step={tab.id} />
+              <StepContent step={tab.id} currentStep={currentStep} />
             </View>
           ))}
       </div>
@@ -210,16 +210,22 @@ function TabsNavigation({
   );
 }
 
-function StepContent({ step }: { step: OnboardingStep }) {
+function StepContent({
+  step,
+  currentStep,
+}: {
+  step: OnboardingStep;
+  currentStep: OnboardingStep;
+}) {
   switch (step) {
     case 1:
       return <StepCredentials />;
     case 2:
       return <StepPlan />;
     case 3:
-      return <StepCheckout />;
+      return currentStep >= 3 ? <StepCheckout /> : null;
     case 4:
-      return <StepMerci />;
+      return currentStep >= 4 ? <StepMerci /> : null;
   }
 }
 
