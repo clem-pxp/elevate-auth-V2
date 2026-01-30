@@ -1,9 +1,74 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useOnboardingStore } from "@/lib/stores/onboarding-store";
+import type { SessionStatusResponse } from "@/lib/types/stripe";
+
+type SessionState =
+  | { status: "loading" }
+  | { status: "success"; email: string | null }
+  | { status: "error" };
 
 export function StepMerci() {
+  const checkoutSessionId = useOnboardingStore(
+    (state) => state.formData.checkoutSessionId,
+  );
+  const [sessionState, setSessionState] = useState<SessionState>(
+    checkoutSessionId
+      ? { status: "loading" }
+      : { status: "success", email: null },
+  );
+
+  useEffect(() => {
+    if (!checkoutSessionId) return;
+
+    async function checkStatus() {
+      try {
+        const res = await fetch(
+          `/api/stripe/session-status?session_id=${checkoutSessionId}`,
+        );
+        if (!res.ok) throw new Error("Failed to fetch session status");
+
+        const data = (await res.json()) as SessionStatusResponse;
+
+        if (data.status === "complete" && data.paymentStatus === "paid") {
+          setSessionState({ status: "success", email: data.customerEmail });
+        } else {
+          setSessionState({ status: "error" });
+        }
+      } catch {
+        setSessionState({ status: "error" });
+      }
+    }
+
+    checkStatus();
+  }, [checkoutSessionId]);
+
+  if (sessionState.status === "loading") {
+    return (
+      <div className="flex flex-col items-center gap-4 py-20 animate-pulse">
+        <div className="h-7 w-56 bg-strong/8 rounded-8" />
+        <div className="h-5 w-72 bg-strong/8 rounded-8" />
+      </div>
+    );
+  }
+
+  if (sessionState.status === "error") {
+    return (
+      <div className="flex flex-col items-center gap-4 py-20">
+        <h2 className="h5 text-center">Paiement en cours de vérification</h2>
+        <p className="text-base text-soft text-center">
+          Votre paiement est en cours de traitement. Vous recevrez un email de
+          confirmation.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center md:gap-12 gap-8">
       <div className="flex flex-col w-full gap-2">
@@ -82,7 +147,7 @@ export function StepMerci() {
         </div>
 
         <Link
-          href="/dashboard"
+          href="/compte"
           className={cn(buttonVariants(), "w-full max-w-[21.25rem]")}
         >
           Accéder à mon compte

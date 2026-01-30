@@ -37,9 +37,9 @@ export function LoginForm() {
 
         const data = await response.json();
         if (data.hasSubscription) {
-          router.push("/dashboard");
+          router.push("/compte");
         } else {
-          router.push("/onboarding");
+          router.push("/signup");
         }
       } catch {
         setServerError("Une erreur est survenue");
@@ -94,7 +94,12 @@ export function LoginForm() {
 
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(isSubmitting) => (
-          <Button type="submit" className="mt-1 h-11.5 rounded-16 " fullWidth isLoading={isSubmitting}>
+          <Button
+            type="submit"
+            className="mt-1 h-11.5 rounded-16 "
+            fullWidth
+            isLoading={isSubmitting}
+          >
             Se connecter
           </Button>
         )}

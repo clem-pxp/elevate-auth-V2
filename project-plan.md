@@ -312,7 +312,7 @@ Solution : `/api/stripe/session-status` interroge Stripe directement (pas Firest
 ### 5. Deep Link + Auto-Login
 
 1. Générer Firebase Custom Token via Admin SDK
-2. Passer dans le deep link : `{scheme}://auth?token=xxx`
+2. Passer dans le deep link : `elevateapp://auth?token=xxx`
 3. L'app utilise `signInWithCustomToken`
 
 ### 6. Custom Claims après paiement
@@ -423,9 +423,9 @@ JWT_SECRET=
 
 # App
 NEXT_PUBLIC_APP_URL=
-NEXT_PUBLIC_DEEP_LINK_SCHEME=
-NEXT_PUBLIC_APP_STORE_URL=
-NEXT_PUBLIC_PLAY_STORE_URL=
+NEXT_PUBLIC_DEEP_LINK_SCHEME=elevateapp
+NEXT_PUBLIC_APP_STORE_URL=https://apps.apple.com/fr/app/elevate/id6737411142
+NEXT_PUBLIC_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=fr.tryelevate
 ```
 
 ---
@@ -477,7 +477,54 @@ Migration vers prod = changer les variables d'environnement uniquement.
 
 ## À clarifier plus tard
 
-- Deep link scheme exact (ex: `elevate://`)
-- URLs App Store et Play Store
 - Events Klaviyo spécifiques
 - Infos supplémentaires à afficher sur le dashboard
+
+## Infos Confirmées
+
+### Deep Link Scheme
+
+- **Production scheme :** `elevateapp`
+- **iOS URL Name :** `elevateapp.deeplink`
+- **Format :** `{scheme}://{path}?{params}`
+
+**Routes supportées :**
+
+| Route | Description | Paramètres |
+|-------|-------------|------------|
+| `home` | Page d'accueil | — |
+| `mealplan` | Meal plan (redirige vers onboarding si non complété) | — |
+| `community` | Section Communauté | — |
+| `workout` ou `workout/fitness` | Workout, onglet fitness | `id` (optionnel) |
+| `workout/running` | Workout, onglet running | `id` (optionnel) |
+| `workout/category` | Catégorie workout | `id` (requis) |
+| `workout/program` | Programme workout | `id` (requis) |
+| `nutrition` | Section Nutrition | — |
+| `nutrition/recipe` | Recette spécifique | `id` (requis) |
+| `nutrition/category` | Catégorie nutrition | `id` (requis) |
+| `mindset` | Section Mindset | — |
+| `mindset/article` | Article spécifique | `id` (requis) |
+| `profile` | Profil utilisateur | — |
+| `progress` | Progression utilisateur | — |
+| `settings/connected-applications` | Applications connectées (Terra, etc.) | — |
+| `auth` | Auto-login avec custom token | `token` (requis) |
+
+**Exemples :**
+- `elevateapp://workout/fitness?id=abc123`
+- `elevateapp://nutrition/recipe?id=xyz789`
+- `elevateapp://home`
+- `elevateapp://auth?token=xxx`
+
+### URLs des Stores
+
+- **Apple App Store :** https://apps.apple.com/fr/app/elevate/id6737411142
+- **Google Play Store :** https://play.google.com/store/apps/details?id=fr.tryelevate
+
+### signInWithCustomToken (Admin)
+
+Utilisé pour l'impersonation admin (debugging, SUPERADMIN uniquement) :
+1. Un admin génère un custom token via le back-office (panel admin)
+2. Le token est copié et collé dans l'app mobile (dev tools)
+3. L'app utilise `signInWithCustomToken` de Firebase pour authentifier l'utilisateur
+
+Ce mécanisme est distinct du deep link auto-login web onboarding, qui utilise aussi des custom tokens mais les génère automatiquement via `/api/auth/generate-app-token`.

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { QueryProvider } from "@/components/providers/query-provider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,7 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans text-strong`}
       >
-        <main className="overflow-clip">{children}</main>
+        <QueryProvider>
+          <main className="overflow-clip">{children}</main>
+        </QueryProvider>
       </body>
     </html>
   );

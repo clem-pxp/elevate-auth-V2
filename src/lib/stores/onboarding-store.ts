@@ -10,6 +10,8 @@ interface OnboardingFormData {
   phone: string;
   birthDate: Date | null;
   selectedPlanId: string | null;
+  firebaseUID: string | null;
+  checkoutSessionId: string | null;
 }
 
 interface OnboardingState {
@@ -30,6 +32,8 @@ const initialFormData: OnboardingFormData = {
   phone: "",
   birthDate: null,
   selectedPlanId: null,
+  firebaseUID: null,
+  checkoutSessionId: null,
 };
 
 export const useOnboardingStore = create<OnboardingState>((set) => ({

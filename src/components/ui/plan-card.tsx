@@ -10,6 +10,8 @@ interface PlanCardProps {
   description: string;
   selected: boolean;
   onSelect: (id: string) => void;
+  totalPrice?: string;
+  badge?: string;
 }
 
 const elevateIconPath = (
@@ -36,6 +38,8 @@ export function PlanCard({
   description,
   selected,
   onSelect,
+  totalPrice,
+  badge,
 }: PlanCardProps) {
   return (
     <button
@@ -62,8 +66,32 @@ export function PlanCard({
             />
           </div>
           <span className="font-medium">{name}</span>
+          {badge && (
+            <span
+              className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded-full",
+                selected
+                  ? "bg-light/20 text-light"
+                  : "bg-accent-base/10 text-accent-base",
+              )}
+            >
+              {badge}
+            </span>
+          )}
         </div>
-        <span className="font-medium">{price}</span>
+        <div className="text-right">
+          <span className="font-medium">{price}</span>
+          {totalPrice && (
+            <p
+              className={cn(
+                "text-xs mt-0.5",
+                selected ? "text-light/70" : "text-soft",
+              )}
+            >
+              {totalPrice}
+            </p>
+          )}
+        </div>
       </div>
 
       <AnimatePresence initial={false}>

@@ -8,6 +8,7 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { StepCheckout } from "@/components/onboarding/step-checkout";
 import { StepCredentials } from "@/components/onboarding/step-credentials";
 import { StepMerci } from "@/components/onboarding/step-merci";
 import { StepPlan } from "@/components/onboarding/step-plan";
@@ -26,11 +27,25 @@ const tabs: { id: OnboardingStep; label: string }[] = [
 ];
 
 export function OnboardingTabs() {
-  const { currentStep, setStep } = useOnboardingStore();
+  const { currentStep, setStep, updateFormData } = useOnboardingStore();
   const isMounted = useMounted();
 
   const viewsContainerRef = useRef<HTMLDivElement>(null);
   const [viewsContainerWidth, setViewsContainerWidth] = useState(0);
+
+  // Detect session_id from Stripe redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (sessionId) {
+      updateFormData({ checkoutSessionId: sessionId });
+      setStep(4);
+      // Clean up URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("session_id");
+      window.history.replaceState({}, "", url.pathname);
+    }
+  }, [setStep, updateFormData]);
 
   useEffect(() => {
     const updateWidth = () => {
@@ -202,20 +217,10 @@ function StepContent({ step }: { step: OnboardingStep }) {
     case 2:
       return <StepPlan />;
     case 3:
-      return <StepPlaceholder step={3} title="Paiement" />;
+      return <StepCheckout />;
     case 4:
       return <StepMerci />;
   }
-}
-
-function StepPlaceholder({ step, title }: { step: number; title: string }) {
-  return (
-    <div className="flex flex-col gap-4 items-center justify-center py-20">
-      <span className="text-soft">Étape {step}</span>
-      <h2 className="h4 text-strong">{title}</h2>
-      <p className="text-soft">À implémenter</p>
-    </div>
-  );
 }
 
 function calculateViewX(difference: number, containerWidth: number) {

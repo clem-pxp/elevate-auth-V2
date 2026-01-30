@@ -64,7 +64,47 @@ The `/onboarding` page manages 4 steps via Zustand state (not separate routes):
 
 2. **Thank You Race Condition:** Webhook may arrive after page display. Use `/api/stripe/session-status` to query Stripe directly (not Firestore) for immediate success display.
 
-3. **Deep Link Auto-Login:** Generate Firebase Custom Token → pass in deep link `{scheme}://auth?token=xxx` → app uses `signInWithCustomToken`
+3. **Deep Link Auto-Login:** Generate Firebase Custom Token → pass in deep link `elevateapp://auth?token=xxx` → app uses `signInWithCustomToken`
+
+### Deep Link Scheme
+
+**Production scheme:** `elevateapp`
+**iOS URL Name:** `elevateapp.deeplink`
+**Format:** `{scheme}://{path}?{params}`
+
+| Route | Description | Parameters |
+|-------|-------------|------------|
+| `home` | Home page | — |
+| `mealplan` | Meal plan (redirects to onboarding if incomplete) | — |
+| `community` | Community section | — |
+| `workout` or `workout/fitness` | Workout fitness tab | `id` (optional) |
+| `workout/running` | Workout running tab | `id` (optional) |
+| `workout/category` | Workout category | `id` (required) |
+| `workout/program` | Workout program | `id` (required) |
+| `nutrition` | Nutrition section | — |
+| `nutrition/recipe` | Specific recipe | `id` (required) |
+| `nutrition/category` | Nutrition category | `id` (required) |
+| `mindset` | Mindset section | — |
+| `mindset/article` | Specific article | `id` (required) |
+| `profile` | User profile | — |
+| `progress` | User progress | — |
+| `settings/connected-applications` | Connected apps (Terra, etc.) | — |
+| `auth` | Auto-login with custom token | `token` (required) |
+
+**Examples:**
+- `elevateapp://workout/fitness?id=abc123`
+- `elevateapp://nutrition/recipe?id=xyz789`
+- `elevateapp://home`
+- `elevateapp://auth?token=xxx`
+
+### signInWithCustomToken (Admin Impersonation)
+
+The app supports `signInWithCustomToken` for admin debugging/impersonation (SUPERADMIN only). Flow:
+1. Admin generates a custom token via the back-office (admin panel)
+2. Token is copied and pasted into the mobile app (dev tools)
+3. App uses `signInWithCustomToken` from Firebase to authenticate as that user
+
+This is separate from the web onboarding deep link auto-login flow, which also uses custom tokens but generates them automatically via `/api/auth/generate-app-token`.
 
 ## Animation Guidelines
 
@@ -121,8 +161,10 @@ FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 KLAVIYO_API_KEY
 JWT_SECRET
-NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_DEEP_LINK_SCHEME
-NEXT_PUBLIC_APP_STORE_URL, NEXT_PUBLIC_PLAY_STORE_URL
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_DEEP_LINK_SCHEME=elevateapp
+NEXT_PUBLIC_APP_STORE_URL=https://apps.apple.com/fr/app/elevate/id6737411142
+NEXT_PUBLIC_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=fr.tryelevate
 ```
 
 ## Path Alias

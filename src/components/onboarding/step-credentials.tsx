@@ -54,13 +54,33 @@ export function StepCredentials() {
           }),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const data = await response.json();
           setServerError(data.error || "Une erreur est survenue");
           return;
         }
 
-        updateFormData(value);
+        const profileResponse = await fetch("/api/profile/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: value.firstName,
+            lastName: value.lastName,
+            phone: value.phone,
+            birthDate: value.birthDate ? value.birthDate.toISOString() : "",
+          }),
+        });
+
+        if (!profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setServerError(
+            profileData.error || "Erreur lors de la création du profil",
+          );
+          return;
+        }
+
+        updateFormData({ ...value, firebaseUID: data.uid, password: "" });
         nextStep();
       } catch {
         setServerError("Une erreur est survenue");
