@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSessionUser } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     const checkoutSession =
-      await stripe.checkout.sessions.retrieve(sessionId);
+      await getStripe().checkout.sessions.retrieve(sessionId);
 
     return NextResponse.json({
       status: checkoutSession.status,

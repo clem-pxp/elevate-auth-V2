@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getSessionUser } from "@/lib/auth";
 import { getAdminFirestore } from "@/lib/firebase-admin";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const checkoutBody = z.object({
   priceId: z.string().min(1, "L'identifiant du prix est requis"),
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const checkoutSession = await getStripe().checkout.sessions.create({
       customer: stripeCustomerId,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",

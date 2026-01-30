@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getSessionUser } from "@/lib/auth";
 import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const profileBody = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const email = userRecord.email!;
 
     // Step 1: Create Stripe Customer FIRST (atomic: if this fails, don't save to Firestore)
-    const customer = await stripe.customers.create({
+    const customer = await getStripe().customers.create({
       email,
       name: `${firstName} ${lastName}`,
       phone,

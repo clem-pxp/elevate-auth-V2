@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -55,7 +55,11 @@ export async function POST(request: Request) {
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
+      event = getStripe().webhooks.constructEvent(
+        body,
+        signature,
+        WEBHOOK_SECRET,
+      );
     } catch {
       return NextResponse.json(
         { error: "Signature invalide" },
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
         if (!firebaseUID) break;
 
         if (session.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(
+          const subscription = await getStripe().subscriptions.retrieve(
             session.subscription as string,
           );
           const periodEnd = (subscription as unknown as Record<string, unknown>)
@@ -88,7 +92,7 @@ export async function POST(request: Request) {
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const customer = await stripe.customers.retrieve(
+        const customer = await getStripe().customers.retrieve(
           subscription.customer as string,
         );
 
@@ -110,7 +114,7 @@ export async function POST(request: Request) {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        const customer = await stripe.customers.retrieve(
+        const customer = await getStripe().customers.retrieve(
           subscription.customer as string,
         );
 
