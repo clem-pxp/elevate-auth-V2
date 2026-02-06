@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { signToken, setSessionCookie } from "@/lib/auth/session";
 import { getAdminAuth } from "@/lib/config/firebase";
+import { getAppUrl } from "@/lib/config/url";
 
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY!;
 const SIGN_IN_WITH_IDP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FIREBASE_API_KEY}`;
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         postBody: `id_token=${idToken}&providerId=google.com`,
-        requestUri: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        requestUri: getAppUrl(request),
         returnIdpCredential: true,
         returnSecureToken: true,
       }),

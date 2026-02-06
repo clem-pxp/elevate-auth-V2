@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { getAdminFirestore } from "@/lib/config/firebase";
 import { getStripe } from "@/lib/config/stripe";
+import { getAppUrl } from "@/lib/config/url";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const session = await getSessionUser();
     if (!session) {
@@ -24,7 +25,7 @@ export async function POST() {
       );
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = getAppUrl(request);
 
     const portalSession = await getStripe().billingPortal.sessions.create({
       customer: stripeCustomerId,

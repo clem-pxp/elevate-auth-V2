@@ -4,7 +4,7 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useOnboardingStore } from "@/stores/onboarding-store";
@@ -15,8 +15,10 @@ export function StepCheckout() {
     (state) => state.formData.selectedPlanId,
   );
   const prevStep = useOnboardingStore((state) => state.prevStep);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchClientSecret = useCallback(async () => {
+    setError(null);
     const res = await fetch("/api/stripe/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -24,7 +26,12 @@ export function StepCheckout() {
     });
 
     if (!res.ok) {
-      throw new Error("Impossible de créer la session de paiement");
+      const data = await res.json().catch(() => ({}));
+      const message =
+        (data as { error?: string }).error ??
+        "Impossible de créer la session de paiement";
+      setError(message);
+      throw new Error(message);
     }
 
     const data = (await res.json()) as { clientSecret: string };
@@ -40,6 +47,28 @@ export function StepCheckout() {
         <Button variant="outline" onClick={prevStep}>
           Retour
         </Button>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="h4 text-strong">Paiement</h1>
+          <p className="mt-2 text-soft">
+            Finalise ton abonnement en toute sécurité
+          </p>
+        </div>
+        <div className="flex flex-col gap-4 items-center justify-center py-12">
+          <p className="text-error-base text-s text-center">{error}</p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={prevStep}>
+              Changer de plan
+            </Button>
+            <Button onClick={() => setError(null)}>Réessayer</Button>
+          </div>
+        </div>
       </div>
     );
   }

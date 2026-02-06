@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED_ROUTES = ["/onboarding", "/compte"];
+const PROTECTED_ROUTES = ["/compte"];
 
 function getSecret() {
   return new TextEncoder().encode(process.env.JWT_SECRET);
@@ -35,5 +35,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/onboarding/:path*", "/compte/:path*"],
+  matcher: ["/compte/:path*"],
 };
