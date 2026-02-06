@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getSessionUser } from "@/lib/auth";
-import { getAdminFirestore } from "@/lib/firebase-admin";
-import { getStripe } from "@/lib/stripe";
+import { getSessionUser } from "@/lib/auth/session";
+import { getAdminFirestore } from "@/lib/config/firebase";
+import { getStripe } from "@/lib/config/stripe";
 
 export async function POST() {
   try {

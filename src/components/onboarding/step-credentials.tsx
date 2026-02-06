@@ -8,8 +8,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import { useOnboardingStore } from "@/lib/stores/onboarding-store";
-import { signupSchema } from "@/lib/validations";
+import { useOnboardingStore } from "@/stores/onboarding-store";
+import { signupSchema } from "@/lib/validations/auth";
 
 const PhoneInput = dynamic(
   () => import("@/components/ui/phone-input").then((m) => m.PhoneInput),

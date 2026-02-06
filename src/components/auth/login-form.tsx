@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginSchema } from "@/lib/validations";
+import { loginSchema } from "@/lib/validations/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export function LoginForm() {
         if (data.hasSubscription) {
           router.push("/compte");
         } else {
-          router.push("/signup");
+          router.push("/onboarding");
         }
       } catch {
         setServerError("Une erreur est survenue");

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { signToken, setSessionCookie } from "@/lib/auth";
-import { getAdminAuth } from "@/lib/firebase-admin";
+import { signToken, setSessionCookie } from "@/lib/auth/session";
+import { getAdminAuth } from "@/lib/config/firebase";
 
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY!;
 const SIGN_IN_WITH_IDP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FIREBASE_API_KEY}`;

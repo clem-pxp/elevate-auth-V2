@@ -2,55 +2,49 @@
 
 ## Objectif
 
-Développer un tunnel d'onboarding web pour l'app mobile Elevate permettant aux utilisateurs de s'inscrire, compléter leur profil, choisir un plan et payer via Stripe avant de télécharger l'app.
+Tunnel d'onboarding web pour l'app mobile Elevate : inscription, profil, choix d'abonnement, paiement Stripe, puis téléchargement de l'app.
 
 ---
 
-## 📊 Statut d'avancement
+## Statut d'avancement
 
-### ✅ Terminé
+### Terminé
 
 | Composant | Description |
 |-----------|-------------|
-| **Infrastructure de base** | Next.js 16 + React 19 + TypeScript + Tailwind CSS v4 |
-| **Page /signup** | Page de création de compte (placeholder) |
-| **Page /login** | Page de connexion avec formulaire |
-| **Page /onboarding** | Single page avec 4 steps + navigation tabs animée |
-| **Composants UI** | Button, Input, Card, DatePicker, PhoneInput, Popover, ScrollArea, Command |
+| **Infrastructure** | Next.js 16.1.4 + React 19 + TypeScript 5 + Tailwind CSS v4 + Bun |
+| **Page /onboarding** | Single page avec 4 steps + navigation tabs animée (Zustand) |
 | **Step 1: Credentials** | Formulaire complet (Prénom, Nom, Téléphone, Date naissance, Email, Password) |
-| **Step 2: Plan Selection** | Affichage des 3 plans avec PlanCard sélectionnable |
-| **Step 4: Thank You** | Page Merci avec liens App Store / Play Store + lien dashboard |
-| **Zustand Store** | onboarding-store.ts avec gestion état formulaire + navigation steps |
-| **Animations** | Transitions fluides entre steps avec Motion (blur, opacity, x-translate) |
-| **Zod Validations** | Schéma signupSchema pour validation formulaire |
-| **Espace Compte** | Layout /compte avec sous-pages profile et facturation (structure) |
+| **Step 2: Plan Selection** | 3 plans dynamiques depuis Stripe avec PlanCard sélectionnable |
+| **Step 3: Checkout** | Stripe Embedded Checkout fonctionnel |
+| **Step 4: Thank You** | Confirmation + liens App Store / Play Store + lien compte |
+| **Page /login** | Connexion email/password + boutons Google/Apple |
+| **Page /signup** | Redirige vers /onboarding (l'inscription se fait au step 1) |
+| **Espace /compte** | Layout avec sous-pages profile et facturation (structure, données mock) |
+| **API Auth** | signup, login, google, generate-app-token |
+| **API Stripe** | prices, create-checkout-session, session-status, create-portal-session |
+| **API Profile** | update (crée Stripe Customer + Firestore) |
+| **Webhook Stripe** | checkout.session.completed, subscription.updated, subscription.deleted, invoice.payment_failed |
+| **Middleware** | Protection des routes /onboarding et /compte (JWT httpOnly cookie) |
+| **Composants UI** | Button, Input, Card, DatePicker, PhoneInput, Calendar, Popover, ScrollArea, Command, PlanCard, SocialProofBadge |
+| **Zustand Store** | onboarding-store avec gestion état formulaire + navigation steps |
+| **Animations** | Transitions fluides entre steps (blur, opacity, x-translate via Motion) |
+| **Zod Validations** | signupSchema, loginSchema, profileSchema, checkoutSchema, signupApiSchema |
+| **Icons** | ElevateIcon, AppStoreIcon, PlayStoreIcon, ChevronDownIcon, CalendarIcon, CreditCardIcon, UserIcon, ArrowBackIcon |
+| **Sécurité** | Claims merge (pas d'écrasement), IDOR protection session-status, `import "server-only"` sur config serveur |
+| **Error boundaries** | Pages not-found.tsx et error.tsx |
 
-### 🚧 En cours / À faire
+### A faire
 
 | Composant | Priorité | Description |
 |-----------|----------|-------------|
-| **Step 3: Checkout** | 🔴 Haute | Stripe Embedded Checkout (placeholder actuellement) |
-| **API /api/auth/signup** | 🔴 Haute | Créer user Firebase Auth |
-| **API /api/auth/login** | 🔴 Haute | Vérifier credentials, retourner JWT |
-| **API /api/profile/update** | 🔴 Haute | Sauvegarder profil + créer Stripe Customer |
-| **API /api/stripe/prices** | 🟡 Moyenne | Récupérer les prix Stripe dynamiquement |
-| **API /api/stripe/create-checkout-session** | 🔴 Haute | Créer session Stripe Embedded Checkout |
-| **API /api/stripe/session-status** | 🟡 Moyenne | Vérifier status paiement |
-| **API /api/webhooks/stripe** | 🔴 Haute | Gérer events Stripe + update Firestore/Claims |
-| **Middleware auth** | 🔴 Haute | Protection routes /onboarding et /dashboard |
-| **Google OAuth** | 🟡 Moyenne | Auth via Google |
-| **Apple Sign-In** | 🟡 Moyenne | Auth via Apple |
-| **API /api/stripe/create-portal-session** | 🟢 Basse | Customer Portal pour /dashboard |
-| **API /api/auth/generate-app-token** | 🟢 Basse | Firebase Custom Token pour deep link |
-| **Klaviyo integration** | 🟢 Basse | Envoi profil marketing |
-
-### 📝 Changements par rapport au plan initial
-
-1. **Phone Input** : Utilisation de `react-phone-number-input` au lieu de `react-international-phone` (mentionné dans le plan). Le composant PhoneInput est un composant custom avec sélecteur de pays dropdown, recherche de pays, et format international.
-
-2. **Structure Steps** : Le Step 1 combine le formulaire profil ET le signup (email/password) en une seule étape au lieu de séparer signup et onboarding.
-
-3. **Compte pages** : Ajout des pages `/compte`, `/compte/profile`, `/compte/facturation` (structure dashboard alternative).
+| **Apple Sign-In** | Moyenne | Compléter l'intégration Apple côté serveur |
+| **Google OAuth client** | Moyenne | Connecter le bouton Google au flow côté client |
+| **Klaviyo** | Basse | Envoi profil marketing au step 1 (non-bloquant) |
+| **Logout** | Moyenne | API + bouton de déconnexion |
+| **Pages /compte** | Moyenne | Remplacer données mock par données réelles (Firestore + Stripe) |
+| **Deep link auto-login** | Basse | Générer custom token + deep link `elevateapp://auth?token=xxx` |
+| **Stripe Customer Portal** | Basse | Intégrer sur la page /compte/facturation |
 
 ---
 
@@ -60,277 +54,47 @@ Développer un tunnel d'onboarding web pour l'app mobile Elevate permettant aux 
 Landing Webflow
        ↓
    ┌───────────────────────────────────┐
-   │         /signup (page)            │  ← Email + Password (ou Google/Apple)
-   │              ou                   │
    │         /login (page)             │  ← Email + Password (ou Google/Apple)
+   │              ou                   │
+   │      /signup → redirige vers      │
    └───────────────────────────────────┘
                    ↓
    ┌───────────────────────────────────┐
    │     /onboarding (SINGLE PAGE)     │
    │                                   │
-   │   Step 1: Formulaire Profil       │  ← Prénom, Nom, Téléphone, Date de naissance
+   │   Step 1: Credentials + Profil    │  ← Email, Password, Prénom, Nom, Téléphone, DOB
    │               ↓                   │
    │   Step 2: Sélection Plan          │  ← Mensuel / Semestriel / Annuel
    │               ↓                   │
    │   Step 3: Checkout                │  ← Stripe Embedded Checkout
    │               ↓                   │
-   │   Step 4: Thank You               │  ← Confirmation + Deep Links
+   │   Step 4: Thank You               │  ← Confirmation + liens stores
    │                                   │
    └───────────────────────────────────┘
                    ↓
-              /dashboard (si déjà abonné)
+              /compte (espace abonné)
                    ↓
-              App Mobile (via deep link)
+              App Mobile (via deep link ou stores)
 ```
 
 ---
 
 ## Stack Technique
 
-| Catégorie | Technologie |
-| --- | --- |
-| Framework | Next.js 15 (App Router) |
-| Data Fetching | TanStack Query |
-| Forms | TanStack Form + Zod |
-| State Management | Zustand |
-| Styling | Tailwind CSS |
-| Animations | Motion (Framer Motion) |
-| Auth/Users | Firebase Admin SDK (server-side) |
-| Payments | Stripe (Embedded Checkout + Customer Portal) |
-| Marketing | Klaviyo API |
-| Date Utils | date-fns |
-| Phone Input | react-international-phone |
-
----
-
-## Pages à Développer
-
-### /signup
-
-Création de compte avec 3 méthodes d'authentification :
-- Email + Password
-- Google OAuth
-- Apple Sign-In
-
-Après signup réussi → redirection vers `/onboarding`
-
-### /login
-
-Connexion avec les mêmes 3 méthodes (tabs ou boutons) :
-- Email + Password
-- Google OAuth  
-- Apple Sign-In
-
-Après login :
-- Si pas abonné → `/onboarding`
-- Si déjà abonné (`subStatus.stripe === true`) → `/dashboard`
-
-### /onboarding (Single Page - 4 Steps)
-
-**Architecture :** Une seule page Next.js avec 4 steps gérés par Zustand. Pas de routes séparées.
-
-**Animations :** Transitions fluides entre steps avec Framer Motion (AnimatePresence mode="wait").
-
-#### Step 1: Formulaire Profil
-
-Champs à collecter :
-- Prénom (required)
-- Nom (required)
-- Téléphone (required, format international)
-- Date de naissance (required)
-
-Actions au submit :
-1. Créer Stripe Customer avec `metadata.firebaseUID`
-2. Sauvegarder dans Firestore collection `users`
-3. Envoyer profil à Klaviyo
-4. Passer au step 2
-
-#### Step 2: Sélection du Plan
-
-Afficher 3 plans avec toggle ou cards :
-
-| Plan | Intervalle | Prix |
-| --- | --- | --- |
-| Mensuel | 1 mois | 19,00€ |
-| Semestriel | 6 mois | 89,94€ |
-| Annuel | 12 mois | 143,88€ |
-
-Prix récupérés dynamiquement depuis Stripe API.
-
-#### Step 3: Checkout
-
-Stripe Embedded Checkout avec :
-- `customer` : le Stripe Customer ID créé au step 1
-- `mode` : subscription
-- `price` : le price ID sélectionné au step 2
-- `metadata` : { firebaseUID, source: 'web-onboarding' }
-
-#### Step 4: Thank You
-
-Contenu :
-- Message de succès
-- Récap de l'abonnement
-- Deep link "Ouvrir l'app" (avec auto-login)
-- Liens App Store / Play Store
-- Lien vers `/dashboard`
-
-### /dashboard (Espace Abonné)
-
-Pour les utilisateurs déjà abonnés :
-- Infos sur l'abonnement actuel
-- Bouton "Gérer mon abonnement" → Stripe Customer Portal
-- Deep links vers l'app
-- Liens stores
-
----
-
-## API Routes
-
-| Route | Méthode | Description |
-| --- | --- | --- |
-| `/api/auth/signup` | POST | Créer user Firebase Auth |
-| `/api/auth/login` | POST | Vérifier credentials, retourner JWT |
-| `/api/auth/google` | POST | Auth via Google OAuth |
-| `/api/auth/apple` | POST | Auth via Apple Sign-In |
-| `/api/profile/update` | POST | Sauvegarder profil + créer Stripe Customer |
-| `/api/stripe/prices` | GET | Récupérer les prix actifs |
-| `/api/stripe/create-checkout-session` | POST | Créer Checkout Session |
-| `/api/stripe/session-status` | GET | Vérifier status d'une session |
-| `/api/stripe/create-portal-session` | POST | Créer session Customer Portal |
-| `/api/webhooks/stripe` | POST | Recevoir events Stripe |
-| `/api/auth/generate-app-token` | POST | Générer Firebase Custom Token |
-
----
-
-## Firebase Configuration
-
-### Firebase Auth
-
-**Méthodes d'authentification à activer :**
-- Email/Password
-- Google OAuth
-- Apple Sign-In
-
-**Custom Claims structure :**
-
-```json
-{
-  "roles": ["premium"],
-  "subStatus": {
-    "stripe": true
-  }
-}
-```
-
-Quand un utilisateur s'abonne via Stripe, le webhook doit mettre à jour les custom claims avec `subStatus.stripe = true`.
-
-### Firestore
-
-**Collection `users` (à créer) :**
-
-| Champ | Type | Description |
-| --- | --- | --- |
-| `uid` | string | Firebase Auth UID |
-| `email` | string | Email |
-| `firstName` | string | Prénom |
-| `lastName` | string | Nom |
-| `phone` | string | Téléphone (format international) |
-| `dateOfBirth` | timestamp | Date de naissance |
-| `stripeCustomerId` | string | Stripe Customer ID |
-| `subscriptionStatus` | string | 'none' \| 'active' \| 'canceled' \| 'past_due' |
-| `subscriptionPlan` | string \| null | Nom du plan |
-| `subscriptionId` | string \| null | Stripe Subscription ID |
-| `createdAt` | timestamp | Date de création |
-| `updatedAt` | timestamp | Dernière mise à jour |
-| `source` | string | 'app' \| 'web-onboarding' |
-
----
-
-## Stripe Configuration
-
-### Product existant
-
-- **Product ID :** `prod_Rag0FKtF5unIUx`
-- **Product Name :** ELEVATE PREMIUM
-
-### Prices à utiliser
-
-| Plan | Price ID | Montant | Intervalle |
-| --- | --- | --- | --- |
-| Mensuel | `price_1QsmrRFWmvpUDWLuVTElOlQo` | 19,00€ | month / 1 |
-| Semestriel | `price_1Qp6q3FWmvpUDWLub7cVDvyP` | 89,94€ | month / 6 |
-| Annuel | `price_1Qp6qXFWmvpUDWLujUwlQa9x` | 143,88€ | year / 1 |
-
-### Webhooks à écouter
-
-| Event | Action |
-| --- | --- |
-| `checkout.session.completed` | Update Firestore + Firebase Custom Claims |
-| `customer.subscription.updated` | Update Firestore subscription status |
-| `customer.subscription.deleted` | Update Firestore + Custom Claims |
-| `invoice.payment_failed` | Update Firestore status = 'past_due' |
-
-### Metadata Strategy
-
-Toujours inclure sur Customer et Checkout Session :
-- `firebaseUID` : l'UID Firebase de l'utilisateur
-- `source` : 'web-onboarding'
-
----
-
-## Points Techniques Critiques
-
-### 1. Création Atomique au Step 1
-
-Ordre des opérations :
-1. Créer Stripe Customer avec `metadata.firebaseUID`
-2. Sauvegarder dans Firestore avec `stripeCustomerId`
-3. Envoyer à Klaviyo (non-bloquant)
-
-Si Stripe échoue → ne pas sauvegarder dans Firestore. Rollback propre.
-
-### 2. Mapping Firebase ↔ Stripe
-
-- Toujours créer le Stripe Customer nous-mêmes
-- Ne jamais laisser Stripe créer le customer automatiquement au checkout
-- `firebaseUID` dans metadata Stripe partout
-- `stripeCustomerId` dans Firestore obligatoire
-
-### 3. Session JWT
-
-- Cookie `httpOnly` avec JWT signé
-- Contenu : `firebaseUID`, `stripeCustomerId`, `email`
-- Expiration : 2h
-- Middleware protégeant `/onboarding/*` et `/dashboard`
-
-### 4. Race Condition Thank You
-
-Le webhook peut arriver après l'affichage de Thank You.
-
-Solution : `/api/stripe/session-status` interroge Stripe directement (pas Firestore) pour afficher le succès immédiatement.
-
-### 5. Deep Link + Auto-Login
-
-1. Générer Firebase Custom Token via Admin SDK
-2. Passer dans le deep link : `elevateapp://auth?token=xxx`
-3. L'app utilise `signInWithCustomToken`
-
-### 6. Custom Claims après paiement
-
-Quand le webhook `checkout.session.completed` arrive :
-1. Récupérer `firebaseUID` depuis metadata
-2. Update Firestore `subscriptionStatus = 'active'`
-3. Update Firebase Custom Claims : `subStatus.stripe = true`
-
-### 7. Vérification Abonnement au Login
-
-Au login, vérifier les custom claims :
-- Si `subStatus.stripe === true` → rediriger vers `/dashboard`
-- Sinon → rediriger vers `/onboarding`
-
-### 8. Google/Apple OAuth
-
-Utiliser Firebase Admin SDK pour vérifier les tokens OAuth côté serveur. Créer l'utilisateur Firebase si nouveau, puis générer notre JWT de session.
+| Catégorie | Technologie | Version |
+|-----------|-------------|---------|
+| Framework | Next.js (App Router) | 16.1.4 |
+| UI | React | 19 |
+| Language | TypeScript | 5 |
+| Styling | Tailwind CSS | v4 |
+| State | Zustand | 5 |
+| Server state | TanStack Query | 5 |
+| Forms | TanStack Form + Zod | v4 |
+| Animations | Motion (Framer Motion) | 12 |
+| Auth/Users | Firebase Admin SDK | server-side |
+| Payments | Stripe (Embedded Checkout + Portal) | — |
+| Marketing | Klaviyo API | pas encore intégré |
+| Package Manager | Bun | — |
 
 ---
 
@@ -339,22 +103,27 @@ Utiliser Firebase Admin SDK pour vérifier les tokens OAuth côté serveur. Cré
 ```
 src/
 ├── app/
-│   ├── layout.tsx
-│   ├── page.tsx                      # Redirect → /signup
-│   ├── signup/
-│   │   └── page.tsx
-│   ├── login/
-│   │   └── page.tsx
+│   ├── layout.tsx                      # Root layout (Inter font, lang="fr")
+│   ├── page.tsx                        # Redirect → /onboarding
+│   ├── error.tsx                       # Error boundary
+│   ├── not-found.tsx                   # 404 page
+│   ├── globals.css                     # Design tokens + Tailwind v4
 │   ├── onboarding/
-│   │   └── page.tsx                  # Single page 4 steps
-│   ├── dashboard/
-│   │   └── page.tsx                  # Espace abonné
+│   │   └── page.tsx                    # Single page 4 steps
+│   ├── signup/
+│   │   └── page.tsx                    # Redirect → /onboarding
+│   ├── login/
+│   │   └── page.tsx                    # Login page
+│   ├── compte/
+│   │   ├── layout.tsx                  # Compte layout (header + nav)
+│   │   ├── page.tsx                    # Compte home
+│   │   ├── profile/page.tsx            # Profile page
+│   │   └── facturation/page.tsx        # Billing page
 │   └── api/
 │       ├── auth/
 │       │   ├── signup/route.ts
 │       │   ├── login/route.ts
 │       │   ├── google/route.ts
-│       │   ├── apple/route.ts
 │       │   └── generate-app-token/route.ts
 │       ├── profile/
 │       │   └── update/route.ts
@@ -366,39 +135,100 @@ src/
 │       └── webhooks/
 │           └── stripe/route.ts
 ├── components/
-│   ├── ui/
-│   │   ├── button.tsx
-│   │   ├── input.tsx
-│   │   ├── card.tsx
-│   │   ├── tabs.tsx
-│   │   └── ...
-│   ├── auth/
-│   │   ├── signup-form.tsx
+│   ├── auth/                           # Auth-related components
 │   │   ├── login-form.tsx
 │   │   ├── google-button.tsx
 │   │   └── apple-button.tsx
-│   └── onboarding/
-│       ├── stepper.tsx
-│       ├── profile-form.tsx          # Step 1
-│       ├── plan-selection.tsx        # Step 2
+│   ├── compte/                         # Compte area components
+│   │   ├── compte-header.tsx
+│   │   └── nav-link.tsx
+│   ├── icons/                          # Extracted SVG icon components
+│   │   ├── elevate-icon.tsx
+│   │   ├── app-store-icon.tsx
+│   │   ├── play-store-icon.tsx
+│   │   ├── chevron-down-icon.tsx
+│   │   ├── arrow-back-icon.tsx
+│   │   ├── calendar-icon.tsx
+│   │   ├── credit-card-icon.tsx
+│   │   └── user-icon.tsx
+│   ├── logo/
+│   │   └── elevate-logo.tsx
+│   ├── onboarding/                     # Onboarding step components
+│   │   ├── onboarding-tabs.tsx         # Main tabs + step navigation
+│   │   ├── step-credentials.tsx        # Step 1
+│   │   ├── step-plan.tsx               # Step 2
+│   │   ├── step-plan-skeleton.tsx      # Step 2 loading state
+│   │   ├── step-checkout.tsx           # Step 3
+│   │   └── step-thank-you.tsx          # Step 4
+│   ├── providers/
+│   │   └── query-provider.tsx
+│   └── ui/                             # Reusable UI components
+│       ├── button.tsx
+│       ├── input.tsx
+│       ├── card.tsx
+│       ├── calendar.tsx
+│       ├── command.tsx
+│       ├── date-picker.tsx
+│       ├── phone-input.tsx
 │       ├── plan-card.tsx
-│       ├── checkout.tsx              # Step 3
-│       └── thank-you.tsx             # Step 4
-├── lib/
-│   ├── firebase-admin.ts
-│   ├── stripe.ts
-│   ├── klaviyo.ts
-│   ├── jwt.ts
-│   └── validations.ts
-├── stores/
-│   └── onboarding-store.ts
+│       ├── popover.tsx
+│       ├── scroll-area.tsx
+│       └── social-proof-badge.tsx
 ├── hooks/
-│   ├── use-prices.ts
-│   └── use-session.ts
-├── middleware.ts                      # Protection des routes
-└── types/
-    └── index.ts
+│   └── use-stripe-prices.ts            # TanStack Query hook for Stripe prices
+├── lib/
+│   ├── auth/
+│   │   ├── session.ts                  # JWT sign/verify + session cookie management
+│   │   └── helpers.ts                  # Shared auth helpers (getSubscriptionStatus)
+│   ├── config/
+│   │   ├── firebase.ts                 # Firebase Admin SDK singleton
+│   │   ├── stripe.ts                   # Stripe SDK singleton
+│   │   └── env.ts                      # Zod env validation
+│   ├── validations/
+│   │   ├── auth.ts                     # signupSchema, loginSchema, signupApiSchema
+│   │   └── profile.ts                  # profileSchema, checkoutSchema
+│   ├── stripe-client.ts                # Client-side Stripe (publishable key)
+│   └── utils.ts                        # cn() utility
+├── stores/
+│   └── onboarding-store.ts             # Zustand store (steps, form data)
+├── types/
+│   ├── stripe.ts                       # Stripe-related types
+│   ├── user.ts                         # FirestoreUser, UserCustomClaims
+│   └── api.ts                          # API response types
+└── middleware.ts                        # Route protection (JWT cookie check)
 ```
+
+---
+
+## API Routes
+
+| Route | Méthode | Description | Status |
+|-------|---------|-------------|--------|
+| `/api/auth/signup` | POST | Créer user Firebase Auth + JWT cookie | Done |
+| `/api/auth/login` | POST | Vérifier credentials, JWT cookie | Done |
+| `/api/auth/google` | POST | Google OAuth (serveur) | Done |
+| `/api/auth/apple` | POST | Apple Sign-In | A faire |
+| `/api/profile/update` | POST | Profil + Stripe Customer + Firestore | Done |
+| `/api/stripe/prices` | GET | Prix actifs depuis Stripe | Done |
+| `/api/stripe/create-checkout-session` | POST | Session Stripe Embedded Checkout | Done |
+| `/api/stripe/session-status` | GET | Status paiement (avec vérification IDOR) | Done |
+| `/api/stripe/create-portal-session` | POST | Customer Portal Stripe | Done |
+| `/api/webhooks/stripe` | POST | Events Stripe → Firestore + Claims | Done |
+| `/api/auth/generate-app-token` | POST | Firebase Custom Token pour deep link | Done |
+
+---
+
+## Sécurité
+
+| Mesure | Status |
+|--------|--------|
+| `import "server-only"` sur firebase.ts et stripe.ts | Done |
+| Claims merge (pas d'écrasement) dans webhook | Done |
+| IDOR protection sur session-status | Done |
+| JWT httpOnly cookie (2h) | Done |
+| Middleware route protection | Done |
+| Zod validation sur inputs API | Partiel |
+| Env validation (Zod) | Done |
 
 ---
 
@@ -409,13 +239,14 @@ src/
 FIREBASE_PROJECT_ID=
 FIREBASE_CLIENT_EMAIL=
 FIREBASE_PRIVATE_KEY=
+FIREBASE_API_KEY=
 
 # Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
-# Klaviyo
+# Klaviyo (pas encore utilisé)
 KLAVIYO_API_KEY=
 
 # JWT
@@ -430,72 +261,73 @@ NEXT_PUBLIC_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=fr.trye
 
 ---
 
-## Environnement de Développement
+## Firebase
 
-Tout en mode test :
-- Firebase : projet test
-- Stripe : mode test (clés `sk_test_`, `pk_test_`)
-- Klaviyo : compte test
+### Auth Methods
 
-Migration vers prod = changer les variables d'environnement uniquement.
+- Email/Password (done)
+- Google OAuth (server done, client wiring needed)
+- Apple Sign-In (not done)
 
----
+### Custom Claims
 
-## Validations (Zod Schemas)
+```json
+{
+  "subStatus": {
+    "stripe": "active" | "inactive"
+  }
+}
+```
 
-### Signup
+### Firestore Collection `users`
 
-- email : email format, required
-- password : min 8 chars, required
-
-### Profile (Step 1)
-
-- firstName : string, min 2 chars, required
-- lastName : string, min 2 chars, required  
-- phone : format international valide, required
-- dateOfBirth : date valide, required
-
----
-
-## Animations
-
-### Transitions entre Steps
-
-- Utiliser Framer Motion avec AnimatePresence
-- `mode="wait"` pour que le step sortant disparaisse avant le nouveau
-- Effet slide + fade (x: 50 → 0, opacity: 0 → 1)
-- Transition spring (stiffness: 300, damping: 30)
-
-### Micro-interactions
-
-- Hover sur les plan cards
-- Animation de sélection du plan
-- Loading states sur les boutons
-- Success animation sur Thank You
+| Champ | Type | Description |
+|-------|------|-------------|
+| `uid` | string | Firebase Auth UID |
+| `email` | string | Email |
+| `firstName` | string | Prénom |
+| `lastName` | string | Nom |
+| `phone` | string | Téléphone (format international) |
+| `dateOfBirth` | string | Date de naissance |
+| `stripeCustomerId` | string | Stripe Customer ID |
+| `subscriptionStatus` | string | active / inactive / canceled / past_due |
+| `subscriptionId` | string | Stripe Subscription ID |
+| `priceId` | string | Stripe Price ID |
+| `currentPeriodEnd` | string | ISO date |
+| `createdAt` | string | ISO date |
+| `updatedAt` | string | ISO date |
 
 ---
 
-## À clarifier plus tard
+## Stripe
 
-- Events Klaviyo spécifiques
-- Infos supplémentaires à afficher sur le dashboard
+### Webhooks écoutés
 
-## Infos Confirmées
+| Event | Action |
+|-------|--------|
+| `checkout.session.completed` | Update Firestore + Firebase Custom Claims (merge) |
+| `customer.subscription.updated` | Update Firestore subscription status |
+| `customer.subscription.deleted` | Update Firestore + Custom Claims → canceled |
+| `invoice.payment_failed` | Update Firestore status → past_due |
 
-### Deep Link Scheme
+### Metadata Strategy
 
-- **Production scheme :** `elevateapp`
-- **iOS URL Name :** `elevateapp.deeplink`
-- **Format :** `{scheme}://{path}?{params}`
+Sur Customer et Checkout Session :
+- `firebaseUID` : UID Firebase
+- `source` : 'web-onboarding'
 
-**Routes supportées :**
+---
+
+## Deep Link Scheme
+
+**Production scheme :** `elevateapp`
+**Format :** `{scheme}://{path}?{params}`
 
 | Route | Description | Paramètres |
 |-------|-------------|------------|
 | `home` | Page d'accueil | — |
-| `mealplan` | Meal plan (redirige vers onboarding si non complété) | — |
-| `community` | Section Communauté | — |
-| `workout` ou `workout/fitness` | Workout, onglet fitness | `id` (optionnel) |
+| `auth` | Auto-login avec custom token | `token` (requis) |
+| `workout/fitness` | Workout, onglet fitness | `id` (optionnel) |
 | `workout/running` | Workout, onglet running | `id` (optionnel) |
 | `workout/category` | Catégorie workout | `id` (requis) |
 | `workout/program` | Programme workout | `id` (requis) |
@@ -505,26 +337,8 @@ Migration vers prod = changer les variables d'environnement uniquement.
 | `mindset` | Section Mindset | — |
 | `mindset/article` | Article spécifique | `id` (requis) |
 | `profile` | Profil utilisateur | — |
-| `progress` | Progression utilisateur | — |
-| `settings/connected-applications` | Applications connectées (Terra, etc.) | — |
-| `auth` | Auto-login avec custom token | `token` (requis) |
+| `progress` | Progression | — |
 
-**Exemples :**
-- `elevateapp://workout/fitness?id=abc123`
-- `elevateapp://nutrition/recipe?id=xyz789`
-- `elevateapp://home`
-- `elevateapp://auth?token=xxx`
-
-### URLs des Stores
-
-- **Apple App Store :** https://apps.apple.com/fr/app/elevate/id6737411142
-- **Google Play Store :** https://play.google.com/store/apps/details?id=fr.tryelevate
-
-### signInWithCustomToken (Admin)
-
-Utilisé pour l'impersonation admin (debugging, SUPERADMIN uniquement) :
-1. Un admin génère un custom token via le back-office (panel admin)
-2. Le token est copié et collé dans l'app mobile (dev tools)
-3. L'app utilise `signInWithCustomToken` de Firebase pour authentifier l'utilisateur
-
-Ce mécanisme est distinct du deep link auto-login web onboarding, qui utilise aussi des custom tokens mais les génère automatiquement via `/api/auth/generate-app-token`.
+**URLs stores :**
+- App Store : https://apps.apple.com/fr/app/elevate/id6737411142
+- Play Store : https://play.google.com/store/apps/details?id=fr.tryelevate

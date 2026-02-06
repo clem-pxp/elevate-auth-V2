@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSessionUser } from "@/lib/auth";
-import { getAdminFirestore } from "@/lib/firebase-admin";
-import { getStripe } from "@/lib/stripe";
+import { getSessionUser } from "@/lib/auth/session";
+import { getAdminFirestore } from "@/lib/config/firebase";
+import { getStripe } from "@/lib/config/stripe";
 
 const checkoutBody = z.object({
   priceId: z.string().min(1, "L'identifiant du prix est requis"),
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       ui_mode: "embedded",
-      return_url: `${appUrl}/signup?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: `${appUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
       metadata: { firebaseUID: uid },
     });
 

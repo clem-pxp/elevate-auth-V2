@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getStripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/config/stripe";
 
 export async function GET() {
   try {

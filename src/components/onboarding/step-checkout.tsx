@@ -7,7 +7,7 @@ import {
 import { useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useOnboardingStore } from "@/lib/stores/onboarding-store";
+import { useOnboardingStore } from "@/stores/onboarding-store";
 import { getStripePromise } from "@/lib/stripe-client";
 
 export function StepCheckout() {

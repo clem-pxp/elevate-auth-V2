@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { StripePriceData } from "@/lib/types/stripe";
+import type { StripePriceData } from "@/types/stripe";
 
 async function fetchPrices(): Promise<StripePriceData[]> {
   const res = await fetch("/api/stripe/prices");

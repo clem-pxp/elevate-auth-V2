@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { signToken, setSessionCookie } from "@/lib/auth";
-import { getAdminAuth } from "@/lib/firebase-admin";
+import { signToken, setSessionCookie } from "@/lib/auth/session";
+import { getAdminAuth } from "@/lib/config/firebase";
 
 const signupBody = z.object({
   email: z.email("Email invalide"),

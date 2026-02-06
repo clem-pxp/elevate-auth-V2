@@ -22,41 +22,88 @@ bun run <script> # Run package.json script
 
 Web onboarding tunnel for the Elevate mobile app. Users sign up, complete profile, choose subscription plan, pay via Stripe, then download the app.
 
-**Flow:** Landing → Signup/Login → Onboarding (4 steps) → Dashboard/App
+**Flow:** Landing → Login → /onboarding (4 steps) → /compte → App
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript 5
-- **Styling:** Tailwind CSS v4
+- **Framework:** Next.js 16.1.4 (App Router) + React 19 + TypeScript 5
+- **Styling:** Tailwind CSS v4 (design tokens in globals.css)
 - **State:** Zustand (onboarding flow), TanStack Query (server state)
-- **Forms:** TanStack Form + Zod validation
+- **Forms:** TanStack Form + Zod v4 validation
 - **Animations:** Motion (Framer Motion)
-- **Backend:** Firebase Admin SDK (auth/users), Stripe (payments), Klaviyo (marketing)
+- **Backend:** Firebase Admin SDK (auth/users), Stripe (payments)
 - **Package Manager:** Bun
 
 ## Architecture
 
+### Key Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/onboarding` | Main onboarding flow (4 steps via Zustand, single page) |
+| `/login` | Login page (email/password + Google/Apple buttons) |
+| `/signup` | Redirects to `/onboarding` |
+| `/compte` | Account area (profile, billing) — French route name |
+| `/` | Redirects to `/onboarding` |
+
 ### Onboarding Flow (Single Page, 4 Steps)
 
 The `/onboarding` page manages 4 steps via Zustand state (not separate routes):
-1. **Profile Form** - firstName, lastName, phone, DOB → Creates Stripe Customer + Firestore user
-2. **Plan Selection** - Displays Stripe prices dynamically (monthly/quarterly/annual)
-3. **Checkout** - Stripe Embedded Checkout
-4. **Thank You** - Confirmation + deep links to mobile app
+1. **Credentials** — email, password, firstName, lastName, phone, DOB → Creates Firebase user + Stripe Customer + Firestore
+2. **Plan Selection** — Displays Stripe prices dynamically (monthly/quarterly/annual)
+3. **Checkout** — Stripe Embedded Checkout
+4. **Thank You** — Confirmation + deep links to mobile app stores
 
 ### Authentication Strategy
 
 - JWT in httpOnly cookie (2h expiration)
 - Firebase Auth methods: Email/Password, Google OAuth, Apple Sign-In
-- Middleware protects `/onboarding/*` and `/dashboard`
-- On login: check `subStatus.stripe` in Firebase Custom Claims → redirect to `/onboarding` or `/dashboard`
+- Middleware protects `/onboarding` and `/compte`
+- No client-side auth context — auth is entirely cookie-based
+- On login: check `subStatus.stripe` in Firebase Custom Claims → redirect to `/onboarding` or `/compte`
+
+### Project Structure
+
+```
+src/
+├── app/                        # Next.js App Router pages + API routes
+├── components/
+│   ├── auth/                   # Login form, OAuth buttons
+│   ├── compte/                 # Account area components
+│   ├── icons/                  # SVG icon components (extracted)
+│   ├── logo/                   # Elevate logo
+│   ├── onboarding/             # Step components (credentials, plan, checkout, thank-you)
+│   ├── providers/              # React context providers
+│   └── ui/                     # Reusable UI primitives (button, input, card, etc.)
+├── hooks/                      # Custom React hooks (use-stripe-prices)
+├── lib/
+│   ├── auth/                   # session.ts (JWT), helpers.ts (subscription check)
+│   ├── config/                 # firebase.ts, stripe.ts, env.ts (all server-only)
+│   └── validations/            # auth.ts, profile.ts (Zod schemas)
+├── stores/                     # Zustand stores (onboarding-store)
+├── types/                      # TypeScript types (stripe, user, api)
+└── middleware.ts                # Route protection
+```
+
+### Import Conventions
+
+- `@/lib/config/firebase` — Firebase Admin SDK (`getAdminAuth`, `getAdminFirestore`)
+- `@/lib/config/stripe` — Stripe server SDK (`getStripe`)
+- `@/lib/auth/session` — JWT/session management (`signToken`, `setSessionCookie`, `getSessionUser`)
+- `@/lib/validations/auth` — Auth schemas (`signupSchema`, `loginSchema`)
+- `@/lib/validations/profile` — Profile schemas (`profileSchema`, `checkoutSchema`)
+- `@/stores/onboarding-store` — Zustand store
+- `@/hooks/use-stripe-prices` — TanStack Query hook
+- `@/types/stripe` — Stripe types
+- `@/types/user` — User types
+- `@/types/api` — API response types
 
 ### Firebase ↔ Stripe Mapping
 
 - **Always** create Stripe Customer ourselves with `metadata.firebaseUID`
 - Never let Stripe auto-create customer at checkout
 - Store `stripeCustomerId` in Firestore `users` collection
-- Webhooks update Firestore + Firebase Custom Claims on subscription events
+- Webhooks update Firestore + Firebase Custom Claims on subscription events (merge, not overwrite)
 
 ### Critical Technical Points
 
@@ -66,77 +113,30 @@ The `/onboarding` page manages 4 steps via Zustand state (not separate routes):
 
 3. **Deep Link Auto-Login:** Generate Firebase Custom Token → pass in deep link `elevateapp://auth?token=xxx` → app uses `signInWithCustomToken`
 
+4. **Claims Merge:** Webhook uses spread operator to merge existing claims — never overwrites.
+
+5. **IDOR Protection:** session-status endpoint verifies `metadata.firebaseUID` matches authenticated user.
+
 ### Deep Link Scheme
 
 **Production scheme:** `elevateapp`
-**iOS URL Name:** `elevateapp.deeplink`
 **Format:** `{scheme}://{path}?{params}`
 
 | Route | Description | Parameters |
 |-------|-------------|------------|
 | `home` | Home page | — |
-| `mealplan` | Meal plan (redirects to onboarding if incomplete) | — |
-| `community` | Community section | — |
-| `workout` or `workout/fitness` | Workout fitness tab | `id` (optional) |
-| `workout/running` | Workout running tab | `id` (optional) |
-| `workout/category` | Workout category | `id` (required) |
-| `workout/program` | Workout program | `id` (required) |
-| `nutrition` | Nutrition section | — |
-| `nutrition/recipe` | Specific recipe | `id` (required) |
-| `nutrition/category` | Nutrition category | `id` (required) |
-| `mindset` | Mindset section | — |
-| `mindset/article` | Specific article | `id` (required) |
-| `profile` | User profile | — |
-| `progress` | User progress | — |
-| `settings/connected-applications` | Connected apps (Terra, etc.) | — |
 | `auth` | Auto-login with custom token | `token` (required) |
-
-**Examples:**
-- `elevateapp://workout/fitness?id=abc123`
-- `elevateapp://nutrition/recipe?id=xyz789`
-- `elevateapp://home`
-- `elevateapp://auth?token=xxx`
-
-### signInWithCustomToken (Admin Impersonation)
-
-The app supports `signInWithCustomToken` for admin debugging/impersonation (SUPERADMIN only). Flow:
-1. Admin generates a custom token via the back-office (admin panel)
-2. Token is copied and pasted into the mobile app (dev tools)
-3. App uses `signInWithCustomToken` from Firebase to authenticate as that user
-
-This is separate from the web onboarding deep link auto-login flow, which also uses custom tokens but generates them automatically via `/api/auth/generate-app-token`.
+| `workout/fitness` | Workout fitness tab | `id` (optional) |
+| `nutrition/recipe` | Specific recipe | `id` (required) |
+| `profile` | User profile | — |
 
 ## Animation Guidelines
 
 Use Motion (Framer Motion) with consistent patterns:
-
-### Step Transitions
-```tsx
-<AnimatePresence mode="wait">
-  <motion.div
-    key={currentStep}
-    initial={{ opacity: 0, x: 50 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -50 }}
-    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-  >
-    {/* Step content */}
-  </motion.div>
-</AnimatePresence>
-```
-
-### Micro-interactions
-- Plan card hover/selection states
-- Button loading spinners
-- Success animation on Thank You page
-- Use spring physics for natural feel
-
-## Performance Priorities
-
-- React Compiler enabled (`reactCompiler: true` in next.config.ts)
-- Fetch Stripe prices once, cache with TanStack Query
-- Minimize bundle size - lazy load checkout components
-- Optimize images via Next.js Image component
+- Spring physics: `stiffness: 300, damping: 30`
+- Step transitions use blur + opacity + x-translate via `View` component in `onboarding-tabs.tsx`
+- `AnimatePresence` for enter/exit animations
+- Plan card selection uses `motion.div` with height animation
 
 ## API Routes Reference
 
@@ -145,7 +145,7 @@ Use Motion (Framer Motion) with consistent patterns:
 | `/api/auth/signup` | POST | Create Firebase Auth user |
 | `/api/auth/login` | POST | Verify credentials, return JWT |
 | `/api/auth/google` | POST | Google OAuth |
-| `/api/auth/apple` | POST | Apple Sign-In |
+| `/api/auth/apple` | POST | Apple Sign-In (not implemented) |
 | `/api/profile/update` | POST | Save profile + create Stripe Customer |
 | `/api/stripe/prices` | GET | Get active subscription prices |
 | `/api/stripe/create-checkout-session` | POST | Create Embedded Checkout session |
@@ -157,10 +157,13 @@ Use Motion (Framer Motion) with consistent patterns:
 ## Environment Variables
 
 ```
-FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+# Required
+FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY, FIREBASE_API_KEY
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-KLAVIYO_API_KEY
 JWT_SECRET
+
+# Optional
+KLAVIYO_API_KEY
 NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_DEEP_LINK_SCHEME=elevateapp
 NEXT_PUBLIC_APP_STORE_URL=https://apps.apple.com/fr/app/elevate/id6737411142
@@ -169,4 +172,4 @@ NEXT_PUBLIC_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=fr.trye
 
 ## Path Alias
 
-`@/*` maps to `./src/*` - use for all imports.
+`@/*` maps to `./src/*` — use for all imports.

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { signToken, setSessionCookie } from "@/lib/auth";
-import { getAdminAuth } from "@/lib/firebase-admin";
-import { loginSchema } from "@/lib/validations";
+import { signToken, setSessionCookie } from "@/lib/auth/session";
+import { getAdminAuth } from "@/lib/config/firebase";
+import { loginSchema } from "@/lib/validations/auth";
 
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY!;
 const SIGN_IN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`;

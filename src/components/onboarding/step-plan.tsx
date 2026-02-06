@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { PlanCard } from "@/components/ui/plan-card";
 import { StepPlanSkeleton } from "@/components/onboarding/step-plan-skeleton";
-import { useOnboardingStore } from "@/lib/stores/onboarding-store";
-import { useStripePrices } from "@/lib/hooks/use-stripe-prices";
-import type { StripePriceData } from "@/lib/types/stripe";
+import { useOnboardingStore } from "@/stores/onboarding-store";
+import { useStripePrices } from "@/hooks/use-stripe-prices";
+import type { StripePriceData } from "@/types/stripe";
 
 function formatCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat("fr-FR", {

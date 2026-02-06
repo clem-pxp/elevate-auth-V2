@@ -22,6 +22,13 @@ export const signupSchema = z.object({
     .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 });
 
+export const signupApiSchema = z.object({
+  email: z.email("Email invalide"),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+});
+
 export const loginSchema = z.object({
   email: z.email("Email invalide"),
   password: z.string().min(1, "Le mot de passe est requis"),

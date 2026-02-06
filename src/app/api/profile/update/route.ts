@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSessionUser } from "@/lib/auth";
-import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
-import { getStripe } from "@/lib/stripe";
+import { getSessionUser } from "@/lib/auth/session";
+import { getAdminAuth, getAdminFirestore } from "@/lib/config/firebase";
+import { getStripe } from "@/lib/config/stripe";
 
 const profileBody = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),

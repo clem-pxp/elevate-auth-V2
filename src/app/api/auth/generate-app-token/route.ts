@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getSessionUser } from "@/lib/auth";
-import { getAdminAuth } from "@/lib/firebase-admin";
+import { getSessionUser } from "@/lib/auth/session";
+import { getAdminAuth } from "@/lib/config/firebase";
 
 export async function POST() {
   try {

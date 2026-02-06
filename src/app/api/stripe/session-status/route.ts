@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSessionUser } from "@/lib/auth";
-import { getStripe } from "@/lib/stripe";
+import { getSessionUser } from "@/lib/auth/session";
+import { getStripe } from "@/lib/config/stripe";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +20,14 @@ export async function GET(request: NextRequest) {
 
     const checkoutSession =
       await getStripe().checkout.sessions.retrieve(sessionId);
+
+    // Verify the session belongs to the authenticated user
+    if (checkoutSession.metadata?.firebaseUID !== session.uid) {
+      return NextResponse.json(
+        { error: "Accès non autorisé" },
+        { status: 403 },
+      );
+    }
 
     return NextResponse.json({
       status: checkoutSession.status,

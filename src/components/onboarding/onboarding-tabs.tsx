@@ -10,14 +10,14 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { StepCheckout } from "@/components/onboarding/step-checkout";
 import { StepCredentials } from "@/components/onboarding/step-credentials";
-import { StepMerci } from "@/components/onboarding/step-merci";
+import { StepThankYou } from "@/components/onboarding/step-thank-you";
 import { StepPlan } from "@/components/onboarding/step-plan";
 import { SocialProofBadge } from "@/components/ui/social-proof-badge";
 import { cn } from "@/lib/utils";
 import {
   useOnboardingStore,
   type OnboardingStep,
-} from "@/lib/stores/onboarding-store";
+} from "@/stores/onboarding-store";
 
 const tabs: { id: OnboardingStep; label: string }[] = [
   { id: 1, label: "Profil" },
@@ -227,7 +227,7 @@ function StepContent({
     case 3:
       return currentStep >= 3 ? <StepCheckout /> : null;
     case 4:
-      return currentStep >= 4 ? <StepMerci /> : null;
+      return currentStep >= 4 ? <StepThankYou /> : null;
   }
 }
 

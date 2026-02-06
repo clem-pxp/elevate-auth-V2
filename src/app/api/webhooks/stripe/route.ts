@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
-import { getStripe } from "@/lib/stripe";
+import { getAdminAuth, getAdminFirestore } from "@/lib/config/firebase";
+import { getStripe } from "@/lib/config/stripe";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -35,8 +35,11 @@ async function updateSubscriptionStatus(
       { merge: true },
     );
 
-  // Update Firebase Custom Claims
+  // Update Firebase Custom Claims (merge with existing)
+  const userRecord = await auth.getUser(firebaseUID);
+  const existingClaims = userRecord.customClaims ?? {};
   await auth.setCustomUserClaims(firebaseUID, {
+    ...existingClaims,
     subStatus: { stripe: isActive ? "active" : "inactive" },
   });
 }
@@ -123,6 +126,20 @@ export async function POST(request: Request) {
         if (!firebaseUID) break;
 
         await updateSubscriptionStatus(firebaseUID, "canceled");
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customer = await getStripe().customers.retrieve(
+          invoice.customer as string,
+        );
+
+        if (customer.deleted) break;
+        const firebaseUID = customer.metadata?.firebaseUID;
+        if (!firebaseUID) break;
+
+        await updateSubscriptionStatus(firebaseUID, "past_due");
         break;
       }
     }
